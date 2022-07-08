@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 @SpringBootApplication
@@ -28,13 +29,13 @@ public class TimskiProektApplication {
             userService.saveRole(new Role(null, "ROLE_ADMIN"));
 
             userService.saveUser(new AppUser(null, "Strasho Naumov", "naumovs", "naumovs123",
-                    new ArrayList<>()));
+                    "strashe_n@test.com", LocalDate.now(), new ArrayList<>()));
             userService.saveUser(new AppUser(null, "Jelena Ognjanoska", "ognj", "ognj123",
-                    new ArrayList<>()));
+                    "jelena_o@test.com", LocalDate.now(), new ArrayList<>()));
             userService.saveUser(new AppUser(null, "Sasho Gramatikov", "gramatikov", "gramatikov123",
-                    new ArrayList<>()));
+                    "sasho_g@test.com", LocalDate.now(), new ArrayList<>()));
             userService.saveUser(new AppUser(null, "Kristijan Isajlovski", "kiko", "kiko123",
-                    new ArrayList<>()));
+                    "kiko_i@test.com", LocalDate.now(), new ArrayList<>()));
 
             userService.addRoleToUser("naumovs", "ROLE_STUDENT");
             userService.addRoleToUser("ognj", "ROLE_STUDENT");
