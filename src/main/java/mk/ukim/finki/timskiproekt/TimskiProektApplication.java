@@ -24,23 +24,25 @@ public class TimskiProektApplication {
     CommandLineRunner run(UserService userService) {
         // Will run after the application has initialized
         return args -> {
-            userService.saveRole(new Role(null, "ROLE_STUDENT"));
-            userService.saveRole(new Role(null, "ROLE_PROFESSOR"));
-            userService.saveRole(new Role(null, "ROLE_ADMIN"));
+            Role studentRole = userService.saveRole(new Role(null, "ROLE_STUDENT"));
+            Role professorRole = userService.saveRole(new Role(null, "ROLE_PROFESSOR"));
+            Role adminRole = userService.saveRole(new Role(null, "ROLE_ADMIN"));
 
-            userService.saveUser(new AppUser(null, "Strasho Naumov", "naumovs", "naumovs123",
-                    "strashe_n@test.com", LocalDate.now(), new ArrayList<>()));
-            userService.saveUser(new AppUser(null, "Jelena Ognjanoska", "ognj", "ognj123",
-                    "jelena_o@test.com", LocalDate.now(), new ArrayList<>()));
-            userService.saveUser(new AppUser(null, "Sasho Gramatikov", "gramatikov", "gramatikov123",
-                    "sasho_g@test.com", LocalDate.now(), new ArrayList<>()));
-            userService.saveUser(new AppUser(null, "Kristijan Isajlovski", "kiko", "kiko123",
-                    "kiko_i@test.com", LocalDate.now(), new ArrayList<>()));
+            userService.saveUser("Strasho Naumov", "naumovs", "naumovs123",
+                    "strashe_n@test.com", LocalDate.now(), studentRole, 183050L);
+            userService.saveUser("Jelena Ognjanoska", "ognj", "ognj123",
+                    "jelena_o@test.com", LocalDate.now(), studentRole, 183005L);
+            userService.saveUser("Kristijan Isajlovski", "kiko", "kiko123",
+                    "kiko_i@test.com", LocalDate.now(), studentRole, 183111L);
+            userService.saveUser("Sasho Gramatikov", "gramatikov", "gramatikov123",
+                    "sasho_g@test.com", LocalDate.now(), professorRole, null);
+            userService.saveUser("Admin Adminovski", "admin", "admin123",
+                    "admin@test.com", LocalDate.now(), adminRole, null);
 
-            userService.addRoleToUser("naumovs", "ROLE_STUDENT");
-            userService.addRoleToUser("ognj", "ROLE_STUDENT");
-            userService.addRoleToUser("gramatikov", "ROLE_PROFESSOR");
-            userService.addRoleToUser("kiko", "ROLE_ADMIN");
+//            userService.addRoleToUser("naumovs", "ROLE_STUDENT");
+//            userService.addRoleToUser("ognj", "ROLE_STUDENT");
+//            userService.addRoleToUser("gramatikov", "ROLE_PROFESSOR");
+//            userService.addRoleToUser("kiko", "ROLE_ADMIN");
         };
     }
 
