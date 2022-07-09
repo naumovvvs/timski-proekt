@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Data
@@ -19,10 +19,10 @@ public class Chat {
     private Long id;
 
     @OneToOne
-    private Message pinnedMessage;
+    private Message pinnedMessage = null;
 
     @OneToMany(mappedBy = "chat", fetch = FetchType.LAZY)
-    private Collection<Message> messages = new ArrayList<>();
+    private List<Message> messages = new ArrayList<>();
 
     @OneToOne
     private Session session;

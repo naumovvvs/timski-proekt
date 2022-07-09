@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Data
@@ -36,5 +36,5 @@ public class Room {
     private Session session;
 
     @ManyToMany
-    private Collection<Student> allowedStudents = new ArrayList<>();
+    private List<Student> allowedStudents = new ArrayList<>();
 }

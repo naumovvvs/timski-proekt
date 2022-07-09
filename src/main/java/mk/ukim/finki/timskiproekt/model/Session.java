@@ -8,7 +8,7 @@ import mk.ukim.finki.timskiproekt.model.enums.SessionStatus;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Data
@@ -31,7 +31,7 @@ public class Session {
     private Room room;
 
     @OneToMany(mappedBy = "session", fetch = FetchType.LAZY)
-    private Collection<StudentInSession> students = new ArrayList<>();
+    private List<StudentInSession> students = new ArrayList<>();
 
     @OneToOne
     private Chat chat;

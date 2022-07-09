@@ -7,7 +7,7 @@ import mk.ukim.finki.timskiproekt.model.enums.Semester;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Data
@@ -25,5 +25,5 @@ public class Course {
     private Semester semester;
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private Collection<Room> rooms = new ArrayList<>();
+    private List<Room> rooms = new ArrayList<>();
 }
