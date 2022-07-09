@@ -3,7 +3,7 @@ package mk.ukim.finki.timskiproekt.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import mk.ukim.finki.timskiproekt.model.enums.ExamStatus;
+import mk.ukim.finki.timskiproekt.model.enums.SessionStatus;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ import java.util.Collection;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Exam {
+public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +25,13 @@ public class Exam {
     private String code;
 
     @Enumerated(value = EnumType.STRING)
-    private ExamStatus status;
+    private SessionStatus status;
 
-    @ManyToOne
+    @OneToOne
     private Room room;
 
-    @OneToMany(mappedBy = "exam", fetch = FetchType.LAZY)
-    private Collection<StudentInExam> students = new ArrayList<>();
+    @OneToMany(mappedBy = "session", fetch = FetchType.LAZY)
+    private Collection<StudentInSession> students = new ArrayList<>();
 
     @OneToOne
     private Chat chat;

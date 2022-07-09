@@ -11,14 +11,14 @@ import javax.persistence.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentInExam {
+public class StudentInSession {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    private Exam exam;
+    private Session session;
 
     @ManyToOne
     private Student student;

@@ -3,6 +3,7 @@ package mk.ukim.finki.timskiproekt.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
@@ -14,7 +15,7 @@ import java.util.Collection;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Student extends AppUser {
-
+    @Column(unique=true)
     private Long index;
 
     @ManyToMany(fetch = FetchType.LAZY)

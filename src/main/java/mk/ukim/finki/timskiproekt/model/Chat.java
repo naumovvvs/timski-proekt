@@ -21,6 +21,9 @@ public class Chat {
     @OneToOne
     private Message pinnedMessage;
 
-    @OneToMany(mappedBy = "chat", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "chat", fetch = FetchType.LAZY)
     private Collection<Message> messages = new ArrayList<>();
+
+    @OneToOne
+    private Session session;
 }

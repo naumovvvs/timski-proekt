@@ -32,13 +32,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
+        http.cors().disable()   ;
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests().antMatchers("/login/**", "/api/token/refresh/**").permitAll();
+
+        // if users tries to access a resource without permission
+        http.exceptionHandling().accessDeniedPage("/login");
+
+        http.formLogin()
+                .loginPage("/login")
+                .defaultSuccessUrl("/home", true)
+                .and()
+                .logout()
+                .logoutUrl("/logout")
+                .deleteCookies("JSESSIONID");
+
+        http.authorizeRequests().antMatchers("/login/**", "/api/token/refresh/**", "/css/**", "/js/**", "/home").permitAll();
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean()));
         // This filter comes before the others, because we need to intercept every request for authorization
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+
     }
 
     @Bean

@@ -32,6 +32,9 @@ public class Room {
     @ManyToOne
     private Professor moderator;
 
-    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
-    private Collection<Exam> exams = new ArrayList<>();
+    @OneToOne
+    private Session session;
+
+    @ManyToMany
+    private Collection<Student> allowedStudents = new ArrayList<>();
 }
