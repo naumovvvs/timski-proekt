@@ -25,4 +25,10 @@ public class StudentInSession {
 
     @Enumerated(value = EnumType.STRING)
     private StudentStatus status;
+
+    public StudentInSession(Session session, Student student) {
+        this.session = session;
+        this.student = student;
+        this.status = StudentStatus.UNIDENTIFIED;
+    }
 }
