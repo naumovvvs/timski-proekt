@@ -35,4 +35,12 @@ public class Session {
 
     @OneToOne
     private Chat chat;
+
+    public Session(String name, String code, Room room) {
+        this.startTime = LocalDateTime.now();
+        this.name = name;
+        this.code = code;
+        this.status = SessionStatus.OPEN;
+        this.room = room;
+    }
 }
