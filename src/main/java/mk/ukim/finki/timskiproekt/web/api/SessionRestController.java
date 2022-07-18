@@ -99,12 +99,12 @@ public class SessionRestController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/end-session/{id}")
+    @GetMapping("/end-session/{id}")
     public void endSession(@PathVariable Long id) {
         this.sessionService.endSession(id);
     }
 
-    @PutMapping("/change-session/{id}/{newStatus}")
+    @GetMapping("/change-session/{id}/{newStatus}")
     public void changeSessionStatus(@PathVariable Long id, @PathVariable String newStatus) {
         this.sessionService.changeSessionStatus(id, SessionStatus.valueOf(newStatus));
     }

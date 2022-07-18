@@ -2,13 +2,19 @@ package mk.ukim.finki.timskiproekt.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import mk.ukim.finki.timskiproekt.model.AppUser;
 import mk.ukim.finki.timskiproekt.model.Chat;
 import mk.ukim.finki.timskiproekt.model.Message;
 import mk.ukim.finki.timskiproekt.model.Session;
+import mk.ukim.finki.timskiproekt.model.dto.SaveMessageDto;
 import mk.ukim.finki.timskiproekt.repository.ChatRepository;
+import mk.ukim.finki.timskiproekt.repository.MessageRepository;
+import mk.ukim.finki.timskiproekt.repository.SessionsRepository;
+import mk.ukim.finki.timskiproekt.repository.UserRepository;
 import mk.ukim.finki.timskiproekt.service.ChatService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,11 +25,30 @@ import java.util.Optional;
 public class ChatServiceImpl implements ChatService {
 
     private final ChatRepository chatRepository;
+    private final SessionsRepository sessionRepository;
+    private final MessageRepository messageRepository;
+    private final UserRepository userRepository;
+
+    @Override
+    public Chat getChat(Long id) {
+        return this.chatRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException(String.format("Chat with id: %d not found!", id)));
+    }
 
     @Override
     public Chat createChat(Session chatSession) {
         log.info("Creating chat for session: {}", chatSession.getName());
         return this.chatRepository.save(new Chat(null, null, new ArrayList<>(), chatSession));
+    }
+
+    @Override
+    public Chat createChatBySessionId(Long sessionId) {
+        Optional<Session> session = this.sessionRepository.findById(sessionId);
+        if (session.isPresent()) {
+            log.info("Creating chat for session: {}", session.get().getName());
+            return this.chatRepository.save(new Chat(null, null, new ArrayList<>(), session.get()));
+        }
+        throw new RuntimeException(String.format("Session with id: %d not found!", sessionId));
     }
 
     @Override
@@ -66,6 +91,21 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    public Message pinMessageById(Long messageId, Long chatId) {
+        Optional<Chat> optChat = this.chatRepository.findById(chatId);
+        Optional<Message> optMessage = this.messageRepository.findById(messageId);
+        if(optChat.isPresent() && optMessage.isPresent()) {
+            Chat chat = optChat.get();
+            chat.setPinnedMessage(optMessage.get());
+            this.chatRepository.save(chat);
+
+            log.info("Pinned message: {}, on chat with id: {}", optMessage.get().getId(), chatId);
+            return optMessage.get();
+        }
+        throw new RuntimeException("Cannot pin message");
+    }
+
+    @Override
     public void clearPinnedMessage(Long chatId) {
         Optional<Chat> optChat = this.chatRepository.findById(chatId);
         if(optChat.isPresent()) {
@@ -91,6 +131,22 @@ public class ChatServiceImpl implements ChatService {
             return message;
         }
         throw new RuntimeException("Cannot add message to chat");
+    }
+
+    @Override
+    public Message saveMessageToChat(Long chatId, SaveMessageDto messageDto) {
+        Optional<Chat> optChat = this.chatRepository.findById(chatId);
+        Optional<AppUser> optUser = this.userRepository.findById(messageDto.getSenderId());
+        if(optChat.isPresent() && optUser.isPresent()) {
+            Chat chat = optChat.get();
+            Message message = new Message(messageDto.getContent(), chat, optUser.get());
+            chat.getMessages().add(message);
+            this.chatRepository.save(chat);
+
+            log.info("Saving new message from sender: {}, to chat: {}", message.getSender().getName(), chatId);
+            return message;
+        }
+        throw new RuntimeException("Cannot save message to chat");
     }
 
     @Override
