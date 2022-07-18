@@ -1,6 +1,8 @@
 package mk.ukim.finki.timskiproekt.service;
 
 import mk.ukim.finki.timskiproekt.model.*;
+import mk.ukim.finki.timskiproekt.model.dto.EditRoomDto;
+import mk.ukim.finki.timskiproekt.model.dto.SaveRoomDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,13 +19,16 @@ public interface RoomService {
 
     Professor getModeratorByRoom(Long id);
 
+    // probably unnecessary
     void addSessionToRoom(Session session, Long roomId);
 
     Map<LocalDateTime, LocalDateTime> getRoomTimeSlot(Long id);
 
     List<Student> getAllowedStudentsByRoom(Long id);
 
-    Room create(String name, LocalDateTime openFrom, LocalDateTime openTo, Long courseId, Long moderatorId);
+    Room create(SaveRoomDto roomDto);
+
+    Room update(Long id, EditRoomDto roomDto);
 
     void delete(Long id);
 }
