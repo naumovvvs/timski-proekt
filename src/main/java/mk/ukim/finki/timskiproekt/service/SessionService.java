@@ -3,6 +3,8 @@ package mk.ukim.finki.timskiproekt.service;
 import mk.ukim.finki.timskiproekt.model.Chat;
 import mk.ukim.finki.timskiproekt.model.Session;
 import mk.ukim.finki.timskiproekt.model.Student;
+import mk.ukim.finki.timskiproekt.model.dto.EditStudentStatusDto;
+import mk.ukim.finki.timskiproekt.model.dto.SaveSessionDto;
 import mk.ukim.finki.timskiproekt.model.enums.SessionStatus;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
 
@@ -21,11 +23,11 @@ public interface SessionService {
 
     Map<LocalDateTime, LocalDateTime> getSessionTimeSlot(Long id);
 
-    Session addStudentInSession(Student student, Long sessionId);
+    Session addStudentInSession(Long studentId, Long sessionId);
 
     List<Student> getStudentsByStatus(StudentStatus status, Long sessionId);
 
-    void editStatusForStudent(StudentStatus newStatus, Long studentId, Long sessionId);
+    void editStatusForStudent(Long sessionId, EditStudentStatusDto studentStatusDto);
 
     Chat getChatBySession(Long id);
 
@@ -33,7 +35,7 @@ public interface SessionService {
 
     void changeSessionStatus(Long id, SessionStatus newStatus);
 
-    Session create(String name, String code, Long roomId);
+    Session create(SaveSessionDto sessionDto);
 
     void delete(Long id);
 }

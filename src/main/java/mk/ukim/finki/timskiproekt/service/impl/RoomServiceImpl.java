@@ -2,6 +2,8 @@ package mk.ukim.finki.timskiproekt.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import mk.ukim.finki.timskiproekt.model.*;
+import mk.ukim.finki.timskiproekt.model.dto.EditRoomDto;
+import mk.ukim.finki.timskiproekt.model.dto.SaveRoomDto;
 import mk.ukim.finki.timskiproekt.repository.CourseRepository;
 import mk.ukim.finki.timskiproekt.repository.ProfessorRepository;
 import mk.ukim.finki.timskiproekt.repository.RoomRepository;
@@ -86,14 +88,24 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Room create(String name, LocalDateTime openFrom, LocalDateTime openTo, Long courseId, Long moderatorId) {
-        Course course = this.courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException(String.format("Course with id: %d not found!", courseId)));
-        Professor moderator = (Professor) this.professorRepository.findById(moderatorId)
-                .orElseThrow(() -> new RuntimeException(String.format("Moderator with id: %d not found!", moderatorId)));
+    public Room create(SaveRoomDto roomDto) {
+        Course course = this.courseRepository.findById(roomDto.getCourseId())
+                .orElseThrow(() -> new RuntimeException(String.format("Course with id: %d not found!", roomDto.getCourseId())));
+        Professor moderator = (Professor) this.professorRepository.findById(roomDto.getModeratorId())
+                .orElseThrow(() -> new RuntimeException(String.format("Moderator with id: %d not found!", roomDto.getModeratorId())));
 
-        Room room = new Room(name, openFrom, openTo, course, moderator);
-        log.info("Creating room for course with id: {}, by moderator with id: {}", courseId, moderatorId);
+        Room room = new Room(roomDto.getName(), roomDto.getOpenFrom(), roomDto.getOpenTo(), course, moderator);
+        log.info("Creating room for course with id: {}, by moderator with id: {}", roomDto.getCourseId(), roomDto.getModeratorId());
+        return this.roomRepository.save(room);
+    }
+
+    @Override
+    public Room update(Long id, EditRoomDto roomDto) {
+        Room room = this.getRoomById(id);
+        room.setName(roomDto.getName());
+        room.setOpenFrom(roomDto.getOpenFrom());
+        room.setOpenTo(roomDto.getOpenTo());
+        log.info("Updating room by id: {}", id);
         return this.roomRepository.save(room);
     }
 
