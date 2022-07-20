@@ -3,7 +3,6 @@ package mk.ukim.finki.timskiproekt.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
@@ -23,7 +22,7 @@ public class Professor extends AppUser {
         super();
     }
 
-    public Professor(String name, String username, String password, String email, LocalDate birthDate, Role role) {
-        super(name, username, password, email, birthDate, role);
+    public Professor(String name, String username, String password, String email, LocalDate birthDate) {
+        super(name, username, password, email, birthDate);
     }
 }

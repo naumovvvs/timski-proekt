@@ -19,9 +19,6 @@ public interface RoomService {
 
     Professor getModeratorByRoom(Long id);
 
-    // probably unnecessary
-    void addSessionToRoom(Session session, Long roomId);
-
     Map<LocalDateTime, LocalDateTime> getRoomTimeSlot(Long id);
 
     List<Student> getAllowedStudentsByRoom(Long id);

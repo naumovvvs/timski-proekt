@@ -22,8 +22,15 @@ public class Student extends AppUser {
         super();
     }
 
-    public Student(String name, String username, String password, String email, LocalDate birthDate, Long index, Role role) {
-        super(name, username, password, email, birthDate, role);
-        this.index = index;
+    public Student(String name, String username, String password, String email, LocalDate birthDate) {
+        super(name, username, password, email, birthDate);
+        this.index = generateIndex();
+    }
+
+    private Long generateIndex() {
+        int yearStudies = LocalDate.now().getYear();
+        int year = yearStudies%100;
+        int random = getUsername().hashCode()%10000;
+        return Integer.toUnsignedLong((year*10000)+random);
     }
 }

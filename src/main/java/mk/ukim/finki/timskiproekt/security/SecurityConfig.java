@@ -5,7 +5,6 @@ import mk.ukim.finki.timskiproekt.filter.CustomAuthenticationFilter;
 import mk.ukim.finki.timskiproekt.filter.CustomAuthorizationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -47,7 +46,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .deleteCookies("JSESSIONID");
 
         http.authorizeRequests().antMatchers("/login/**", "/api/token/refresh/**", "/css/**", "/js/**", "/home").permitAll();
-        http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
+        //http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
+        //http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/test/**").authenticated();
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean()));
         // This filter comes before the others, because we need to intercept every request for authorization
