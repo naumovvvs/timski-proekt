@@ -2,6 +2,8 @@ package mk.ukim.finki.timskiproekt.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -15,7 +17,8 @@ public class Student extends AppUser {
     @Column(unique=true)
     private Long index;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @ManyToMany
     private List<Course> courses = new ArrayList<>();
 
     public Student() {

@@ -10,8 +10,12 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
   <div class="container">
     <a class="navbar-brand" href="index.html">FINKI Ispiti</a>
-      <form class="d-flex">
-          <button class="btn btn-primary"><a href="login.html" class="text-white" style="text-decoration: none;">Login</a></button>
+      <form class="d-flex align-items-center">
+          <p id="notLogged" class="my-2 mx-1">You are not logged in</p>
+          <p id="login" class="my-2 mx-1">(<a href="login.html">Login</a>)</p>
+          <p id="loggedUserName" class="my-2 mx-1">Hello </p>
+          <p id="logout" class="my-2 mx-1">(<a href="#">Logout</a>)</p>
+
       </form>
     </div>
 </nav>
@@ -26,40 +30,13 @@
                 <h2>Достапни курсеви</h2>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-3 py-3">
-                <div class="card" style="width: 18rem;">
-                    <img src="https://images-preview.moj-posao.net/article/db/adaa392bd-resize-820x0x100.jpg" class="card-img-top border-bottom" style="height:150px; width:100%; object-fit: cover;">
-                    <div class="card-body" style="height: 100px;">
-                        <h5 class="text-primary"><a href="#">Тимски проект</a></h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 py-3">
-                <div class="card" style="width: 18rem;">
-                    <img src="https://media.springernature.com/w580h326/nature-cms/uploads/collections/Networks-Collection-img-final-f2c265a59e457f48645e2aa3ff90e942.jpg" class="card-img-top border-bottom" style="height:150px; width:100%; object-fit: cover;">
-                    <div class="card-body" style="height: 100px;">
-                        <h5 class="text-primary"><a href="#">Компјутерски Мрежи</a></h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 py-3">
-                <div class="card" style="width: 18rem;">
-                    <img src="https://miro.medium.com/max/1400/1*mLqtKV1FjUg-WKlLW-cXjQ.jpeg" class="card-img-top border-bottom" style="height:150px; width:100%; object-fit: cover;">
-                    <div class="card-body" style="height: 100px;">
-                        <h5 class="text-primary"><a href="#">Бази на податоци</a></h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 py-3">
-                <div class="card" style="width: 18rem;">
-                    <img src="https://99designs-blog.imgix.net/blog/wp-content/uploads/2018/09/WHAT-IS-WEB-DESIGN.jpg?auto=format&q=60&w=1860&h=1395&fit=crop&crop=faces" class="card-img-top border-bottom" style="height:150px; width:100%; object-fit: cover;">
-                    <div class="card-body" style="height: 100px;">
-                        <h5 class="text-primary"><a href="#">Веб дизајн</a></h5>
-                    </div>
-                </div>
-            </div>
+        <div class="row" id="subject-content">
         </div>
     </div>
+<script
+        src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+    <script src="/js/home.js"></script>
 </body>
 </html>

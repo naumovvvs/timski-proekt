@@ -16,18 +16,17 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
       cache: false,
       processData: false,
       contentType: false,
-      success: function (data) {
+      success: function (data, response) {
          // store tokens in localStorage
-         console.log(data);
+         console.log(response);
          window.localStorage.setItem('refreshToken', JSON.stringify(data['refreshToken']));
          window.localStorage.setItem('accessToken', JSON.stringify(data['accessToken']));
-
-         window.location.assign("http://localhost:8080/home");
+         window.location.assign("http://localhost:8080/home")
       },
       error: function (rs) {
          console.error(rs.status);
          console.error(rs.responseText);
       }
    });
-
 });
+
