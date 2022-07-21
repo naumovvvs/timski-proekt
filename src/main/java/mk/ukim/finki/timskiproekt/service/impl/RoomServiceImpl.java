@@ -65,14 +65,6 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public void addSessionToRoom(Session session, Long roomId) {
-        Room room = this.getRoomById(roomId);
-        room.setSession(session);
-        log.info("Setting session with id: {} for room with id: {}", session.getId(), room);
-        this.roomRepository.save(room);
-    }
-
-    @Override
     public Map<LocalDateTime, LocalDateTime> getRoomTimeSlot(Long id) {
         Room room = this.getRoomById(id);
         HashMap<LocalDateTime, LocalDateTime> timeSlot = new HashMap<>();

@@ -14,7 +14,7 @@ public class Admin extends AppUser{
         super();
     }
 
-    public Admin(String name, String username, String password, String email, LocalDate birthDate, Role role) {
-        super(name, username, password, email, birthDate, role);
+    public Admin(String name, String username, String password, String email, LocalDate birthDate) {
+        super(name, username, password, email, birthDate);
     }
 }

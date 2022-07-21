@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.Room;
+import mk.ukim.finki.timskiproekt.model.dto.CourseDTO;
 import mk.ukim.finki.timskiproekt.model.enums.Semester;
 import mk.ukim.finki.timskiproekt.repository.CourseRepository;
 import mk.ukim.finki.timskiproekt.service.CourseService;
@@ -50,9 +51,10 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Course createCourse(String courseName, String courseCode, Semester semester) {
-        log.info("Creating course with name: {}, and code: {}", courseName, courseCode);
-        return this.courseRepository.save(new Course(null, courseName, courseCode, semester, new ArrayList<>()));
+    public Course createCourse(CourseDTO courseDTO) {
+        log.info("Creating course with name: {}, and code: {}", courseDTO.getName(), courseDTO.getCode());
+        return this.courseRepository.save(new Course(null, courseDTO.getName(), courseDTO.getCode(),
+                courseDTO.getImageUrl(), courseDTO.getSemester(), new ArrayList<>()));
     }
 
     @Override

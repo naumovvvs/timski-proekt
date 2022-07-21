@@ -3,6 +3,8 @@ package mk.ukim.finki.timskiproekt.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mk.ukim.finki.timskiproekt.model.*;
+import mk.ukim.finki.timskiproekt.model.dto.RoleDTO;
+import mk.ukim.finki.timskiproekt.model.dto.SaveUserDTO;
 import mk.ukim.finki.timskiproekt.repository.*;
 import mk.ukim.finki.timskiproekt.service.UserService;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,7 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +30,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final ProfessorRepository professorRepository;
     private final AdminRepository adminRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    //TODO: add more logic for validating username, checking for duplicates, checking for null objects...
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -47,30 +47,62 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public AppUser saveUser(String name, String username, String password, String email,
-                            LocalDate birthDate, Role role, Long index) {
-        log.info("Saving new user {} to database", username);
+    public AppUser saveUser(SaveUserDTO saveUserDTO) {
+        log.info("Saving new user {} to database", saveUserDTO.getUsername());
 
-        switch (role.getName()) {
-            case "ROLE_STUDENT":
-                return this.studentRepository.save(new Student(name, username,
-                        passwordEncoder.encode(password), email, birthDate, index, role));
-            case "ROLE_PROFESSOR":
-                return this.professorRepository.save(new Professor(name, username,
-                        passwordEncoder.encode(password), email, birthDate, role));
-            case "ROLE_ADMIN":
-                return this.adminRepository.save(new Admin(name, username,
-                        passwordEncoder.encode(password), email, birthDate, role));
+        String accType = saveUserDTO.getAccountType().getName();
+
+        //Check for duplicate usernames
+        if(userRepository.findByUsername(saveUserDTO.getUsername()) != null) {
+            log.info("A user with the same username already exists! username: {}", saveUserDTO.getUsername());
+            throw new RuntimeException("Error saving user");
+        }
+
+        switch (accType) {
+            case "ROLE_STUDENT": {
+
+                AppUser user = this.studentRepository.save(new Student(saveUserDTO.getName(), saveUserDTO.getUsername(),
+                        passwordEncoder.encode(saveUserDTO.getPassword()), saveUserDTO.getEmail(),
+                        saveUserDTO.getBirthDate()));
+
+                return addRolesToUser(user, saveUserDTO.getRoles());
+            }
+            case "ROLE_PROFESSOR": {
+                AppUser user = this.professorRepository.save(new Professor(saveUserDTO.getName(), saveUserDTO.getUsername(),
+                        passwordEncoder.encode(saveUserDTO.getPassword()), saveUserDTO.getEmail(),
+                        saveUserDTO.getBirthDate()));
+
+                return addRolesToUser(user, saveUserDTO.getRoles());
+            }
+            case "ROLE_ADMIN": {
+                AppUser user = this.adminRepository.save(new Admin(saveUserDTO.getName(), saveUserDTO.getUsername(),
+                        passwordEncoder.encode(saveUserDTO.getPassword()), saveUserDTO.getEmail(),
+                        saveUserDTO.getBirthDate()));
+
+                return addRolesToUser(user, saveUserDTO.getRoles());
+            }
             default:
-                // TODO: If null return error on frontend
-                return null;
+                throw new RuntimeException("No user type selected");
         }
     }
 
+    private AppUser addRolesToUser(AppUser user, List<RoleDTO> rolesDTO ) {
+        List<Role> userRoles = user.getRoles();
+
+        for (RoleDTO r : rolesDTO) {
+            Role role = roleRepository.findByName(r.getName());
+            userRoles.add(role);
+        }
+
+        user.setRoles(userRoles);
+
+        return this.userRepository.save(user);
+    }
+
     @Override
-    public Role saveRole(Role role) {
+    public Role saveRole(RoleDTO role) {
         log.info("Saving new role {} to database", role.getName());
-        return this.roleRepository.save(role);
+        return this.roleRepository.save(new Role(role.getName()));
     }
 
     @Override
@@ -78,7 +110,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         log.info("Adding role {} to user {}", rollName, username);
         AppUser appUser = this.userRepository.findByUsername(username);
         Role role = this.roleRepository.findByName(rollName);
-        appUser.getRoles().add(role);
+
+        if(appUser!=null && role!=null && !appUser.getRoles().contains(role)) {
+            appUser.getRoles().add(role);
+        }
     }
 
     @Override
