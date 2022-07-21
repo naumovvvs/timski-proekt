@@ -24,4 +24,11 @@ public class Message {
 
     @ManyToOne
     private AppUser sender;
+
+    public Message(String content, Chat chat, AppUser sender) {
+        this.content = content;
+        this.sentAt = LocalDateTime.now();
+        this.chat = chat;
+        this.sender = sender;
+    }
 }

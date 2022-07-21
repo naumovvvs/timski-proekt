@@ -37,4 +37,12 @@ public class Room {
 
     @ManyToMany
     private List<Student> allowedStudents = new ArrayList<>();
+
+    public Room(String name, LocalDateTime openFrom, LocalDateTime openTo, Course course, Professor moderator) {
+        this.name = name;
+        this.openFrom = openFrom;
+        this.openTo = openTo;
+        this.course = course;
+        this.moderator = moderator;
+    }
 }
