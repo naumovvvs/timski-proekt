@@ -21,6 +21,7 @@ public class Session {
     private Long id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    @Column(unique=true)
     private String name;
     private String code;
 

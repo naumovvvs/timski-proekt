@@ -18,8 +18,13 @@ public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
+    @Column(unique=true)
     private String code;
+
+    private String imageUrl;
 
     @Enumerated(value = EnumType.STRING)
     private Semester semester;

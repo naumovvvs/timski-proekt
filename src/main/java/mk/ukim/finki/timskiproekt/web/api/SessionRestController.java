@@ -45,7 +45,7 @@ public class SessionRestController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteById(@PathVariable Long id) {
+    public ResponseEntity<?> deleteById(@PathVariable Long id) {
         this.sessionService.delete(id);
         try {
             this.sessionService.getSession(id);

@@ -1,20 +1,22 @@
-package mk.ukim.finki.timskiproekt.api;
+package mk.ukim.finki.timskiproekt.web.api;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mk.ukim.finki.timskiproekt.model.AppUser;
 import mk.ukim.finki.timskiproekt.model.Role;
+import mk.ukim.finki.timskiproekt.model.dto.*;
 import mk.ukim.finki.timskiproekt.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.modelmapper.ModelMapper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,32 +31,57 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 @Slf4j
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("/api")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserResource {
     private final UserService userService;
+    private final ModelMapper modelMapper;
 
-    @GetMapping("/users")
-    public ResponseEntity<List<AppUser>> getAllUsers(){
-        return ResponseEntity.ok().body(userService.getAllUsers());
+    @GetMapping("/current")
+    public ResponseEntity<UserDTO> getCurrentUser() {
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        AppUser appUser = this.userService.getUser(username);
+
+        return ResponseEntity.ok().body(modelMapper.map(appUser, UserDTO.class));
     }
 
-    @PostMapping("/user/save")
-    public ResponseEntity<AppUser> saveUser(@RequestBody AppUser appUser){
-        // TODO: FIX THIS
-//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/user/save").toUriString());
-//        return ResponseEntity.created(uri).body(userService.saveUser(appUser));
-        return ResponseEntity.ok().build();
+    @GetMapping("/{username}")
+    public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
+        return ResponseEntity.ok().body(modelMapper.map(userService.getUser(username), UserDTO.class));
+    }
+
+    @GetMapping("/all_users")
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> allUsersDTO = new ArrayList<>();
+        userService.getAllUsers().forEach(x -> allUsersDTO.add(modelMapper.map(x, UserDTO.class)));
+
+        return ResponseEntity.ok().body(allUsersDTO);
+    }
+
+    @GetMapping("/{professorUsername}/allCourses")
+    public ResponseEntity<List<CourseDTO>> getAllCoursesByProfessor(@PathVariable String professorUsername) {
+        List<CourseDTO> allCourses = new ArrayList<>();
+        userService.getAllCoursesByProfessor(professorUsername)
+                .forEach(x -> allCourses.add(modelMapper.map(x, CourseDTO.class)));
+
+        return ResponseEntity.ok().body(allCourses);
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<UserDTO> saveUser(@RequestBody SaveUserDTO saveUserDTO) {
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/user/save").toUriString());
+        return ResponseEntity.created(uri).body(modelMapper.map(userService.saveUser(saveUserDTO), UserDTO.class));
     }
 
     @PostMapping("/role/save")
-    public ResponseEntity<Role> saveRole(@RequestBody Role role){
+    public ResponseEntity<RoleDTO> saveRole(@RequestBody RoleDTO role) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/role/save").toUriString());
-        return ResponseEntity.created(uri).body(userService.saveRole(role));
+        return ResponseEntity.created(uri).body(modelMapper.map(userService.saveRole(role), RoleDTO.class));
     }
 
     @PostMapping("/role/addRoleToUser")
-    public ResponseEntity<?> addRoleToUser(@RequestBody RoleToUserForm form){
+    public ResponseEntity<?> addRoleToUser(@RequestBody RoleToUserDTO form) {
         userService.addRoleToUser(form.getUsername(), form.getRollName());
         return ResponseEntity.ok().build();
     }
@@ -75,7 +102,7 @@ public class UserResource {
 
                 String accessToken = JWT.create()
                         .withSubject(user.getUsername())
-                        .withExpiresAt(new Date(System.currentTimeMillis()+ (30*60*1000)))
+                        .withExpiresAt(new Date(System.currentTimeMillis() + (30 * 60 * 1000)))
                         .withIssuer(request.getRequestURL().toString())
                         .withClaim("roles",
                                 user.getRoles().stream()
@@ -99,15 +126,8 @@ public class UserResource {
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
             }
-        }
-        else {
+        } else {
             throw new RuntimeException("Refresh token is missing");
         }
     }
-}
-
-@Data
-class RoleToUserForm {
-    private String username;
-    private String rollName;
 }

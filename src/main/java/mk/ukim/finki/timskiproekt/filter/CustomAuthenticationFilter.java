@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -70,8 +71,10 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     }
 
     // Sho da se napravi koga eden user ke proba povekje pati da se najavi (lock acc)
-//    @Override
-//    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-//        super.unsuccessfulAuthentication(request, response, failed);
-//    }
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        new ObjectMapper().writeValue(response.getOutputStream(), "Failed authentication");
+        super.unsuccessfulAuthentication(request, response, failed);
+    }
 }
