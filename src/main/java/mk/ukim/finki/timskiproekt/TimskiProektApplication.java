@@ -2,12 +2,11 @@ package mk.ukim.finki.timskiproekt;
 
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.Role;
-import mk.ukim.finki.timskiproekt.model.dto.CourseDTO;
-import mk.ukim.finki.timskiproekt.model.dto.CourseToStudentDTO;
-import mk.ukim.finki.timskiproekt.model.dto.RoleDTO;
-import mk.ukim.finki.timskiproekt.model.dto.SaveUserDTO;
+import mk.ukim.finki.timskiproekt.model.Room;
+import mk.ukim.finki.timskiproekt.model.dto.*;
 import mk.ukim.finki.timskiproekt.model.enums.Semester;
 import mk.ukim.finki.timskiproekt.service.CourseService;
+import mk.ukim.finki.timskiproekt.service.RoomService;
 import mk.ukim.finki.timskiproekt.service.StudentService;
 import mk.ukim.finki.timskiproekt.service.UserService;
 
@@ -19,6 +18,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 
 @SpringBootApplication
@@ -29,7 +30,7 @@ public class TimskiProektApplication {
     }
 
     @Bean
-    CommandLineRunner run(UserService userService, CourseService courseService, StudentService studentService) {
+    CommandLineRunner run(UserService userService, CourseService courseService, StudentService studentService, RoomService roomService) {
         // Will run after the application has initialized
         return args -> {
             Role studentRole = userService.saveRole(new RoleDTO("ROLE_STUDENT"));
@@ -60,6 +61,10 @@ public class TimskiProektApplication {
             courseService.createCourse(new CourseDTO("Бази на податоци", "DB001", "https://miro.medium.com/max/1400/1*mLqtKV1FjUg-WKlLW-cXjQ.jpeg", Semester.WINTER));
             courseService.createCourse(new CourseDTO("Веб дизајн", "WD001", "https://99designs-blog.imgix.net/blog/wp-content/uploads/2018/09/WHAT-IS-WEB-DESIGN.jpg?auto=format&q=60&w=1860&h=1395&fit=crop&crop=faces", Semester.SUMMER));
             studentService.addCourseToStudent(km, 3L);
+            Room s1 = roomService.create(new SaveRoomDto("Испит - Компјутерски Мрежи", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ));
+            Room s2 = roomService.create(new SaveRoomDto("Предавања", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ));
+            courseService.addRoomToCourse(s1, "KM001");
+            courseService.addRoomToCourse(s2, "KM001");
 //            userService.addRoleToUser("naumovs", "ROLE_STUDENT");
 //            userService.addRoleToUser("ognj", "ROLE_STUDENT");
 //            userService.addRoleToUser("gramatikov", "ROLE_PROFESSOR");

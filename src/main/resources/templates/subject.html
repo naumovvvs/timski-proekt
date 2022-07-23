@@ -9,27 +9,33 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
     <div class="container">
-        <a class="navbar-brand" href="index.html">FINKI Ispiti</a>
-        <form class="d-flex">
-            <button class="btn btn-primary"><a href="login.html" class="text-white" style="text-decoration: none;">Login</a></button>
+        <a class="navbar-brand" href="http://localhost:8080/home">FINKI Ispiti</a>
+        <form class="d-flex align-items-center">
+            <p id="notLogged" class="my-2 mx-1">You are not logged in</p>
+            <p id="login" class="my-2 mx-1">(<a href="login.html">Login</a>)</p>
+            <p id="loggedUserName" class="my-2 mx-1">Hello </p>
+            <p id="logout" class="my-2 mx-1">(<a href="#">Logout</a>)</p>
         </form>
     </div>
 </nav>
 <div class="container">
     <div class="row">
         <div class="col-md-12 py-3 border-bottom">
-            <h1>Име на предметот</h1>
+            <h1 class="course-title"></h1>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12 py-3">
             <h4 class="text-primary">Topic 1</h4>
         </div>
-        <div class="col-md-12 mx-5 py-2 d-flex border-bottom align-center">
-            <img src="https://ispiti.finki.ukim.mk/theme/image.php/classic/bigbluebuttonbn/1637703842/icon">
-            <p class="text-primary">Сесија 1</p>
+        <div class="col-md-12 mx-5 py-2 room-container">
         </div>
     </div>
 </div>
+<script
+        src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+<script src="js/subject.js"></script>
 </body>
 </html>

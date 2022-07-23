@@ -1,8 +1,11 @@
 package mk.ukim.finki.timskiproekt.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.minidev.json.annotate.JsonIgnore;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -24,6 +27,7 @@ public class Room {
     private LocalDateTime openTo;
 
     @ManyToOne
+    @JsonBackReference
     private Course course;
 
     /*
