@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import mk.ukim.finki.timskiproekt.model.AppUser;
 import mk.ukim.finki.timskiproekt.model.Role;
 import mk.ukim.finki.timskiproekt.model.dto.*;
+import mk.ukim.finki.timskiproekt.service.AgoraService;
 import mk.ukim.finki.timskiproekt.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 @RequiredArgsConstructor
 public class UserResource {
     private final UserService userService;
+    private final AgoraService agoraService;
     private final ModelMapper modelMapper;
 
     @GetMapping("/current")
@@ -44,6 +46,15 @@ public class UserResource {
         AppUser appUser = this.userService.getUser(username);
 
         return ResponseEntity.ok().body(modelMapper.map(appUser, UserDTO.class));
+    }
+
+    @PostMapping("/agora/generate-rtc-token")
+    public ResponseEntity<String> generateRTCToken(@RequestBody AgoraTokenDTO agoraTokenDTO) {
+        return ResponseEntity.ok().body(agoraService.createRTCToken(agoraTokenDTO.getRoomId(), agoraTokenDTO.getUserId()));
+    }
+    @PostMapping("/agora/generate-rtm-token")
+    public ResponseEntity<String> generateRTMToken(@RequestBody AgoraTokenDTO agoraTokenDTO) throws Exception {
+        return ResponseEntity.ok().body(agoraService.createRTMToken(agoraTokenDTO.getUserId()));
     }
 
     @GetMapping("/{username}")

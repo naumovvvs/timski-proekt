@@ -2,43 +2,94 @@ const APP_ID = "4b77f4fc58994fdd9fe727a7106ad66a";
 
 // user id
 let uid = sessionStorage.getItem("uid");
+// contains current logged in user
+let currentLoggedInUser;
 
-if(!uid) {
+$.ajax({
+    url: "/api/user/current",
+    type: "GET",
+    async: false,
+    headers: {
+      "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+    },
+    success: function (response) {
+        uid = response.id;
+        currentLoggedInUser = response;
+    },
+    error: function (rs) {
+        console.error(rs.status);
+        console.error(rs.responseText);
+    }
+});
 
-    $.ajax({
-        url: "/api/user/current",
-        type: "GET",
-        async: false,
-        headers: {
-          "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
-        },
-        success: function (response) {
-            uid = response.id;
-        },
-        error: function (rs) {
-            console.error(rs.status);
-            console.error(rs.responseText);
-        }
-    });
+sessionStorage.setItem("uid", uid);
 
-    sessionStorage.setItem("uid", uid);
-}
 
 // test za uid
-console.log(parseInt(sessionStorage.getItem("uid")));
+console.log("User id: " + parseInt(sessionStorage.getItem("uid")));
 
-
-let token = "0064b77f4fc58994fdd9fe727a7106ad66aIADXbeo2+kWgFVYTNEDm9bVBpRKg82Cnaid0yvD7X8COz2TNKL8AAAAAEAAU3oYIEpvdYgEAAQAPm91i";
-// core object for functionality
+// token used for RTC authorization in Agora
+let rtcToken = null;
+// token used for RTM authorization in Agora
+let rtmToken = null;
+// RTC core object for functionality
 let client;
+// rtm client
+let rtmClient;
+// rtm channel
+let channel;
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 let roomId = urlParams.get('room');
 
+console.log("Room id: " + roomId);
+console.log(roomId);
+
 if(!roomId) {
     roomId = 'main';
 }
+
+const agoraDTO = {
+    "roomId": roomId,
+    "userId": uid
+};
+
+$.ajax({
+    type: "POST",
+    url: "/api/user/agora/generate-rtc-token",
+    async: false,
+    data: JSON.stringify(agoraDTO),
+    contentType: "application/json; charset=utf-8",
+    headers: {
+        "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+    },
+    success: function (response) {
+        rtcToken = response;
+    },
+    error: function (rs) {
+        console.error(rs.status);
+        console.error(rs.responseText);
+    }
+});
+
+$.ajax({
+    type: "POST",
+    url: "/api/user/agora/generate-rtm-token",
+    async: false,
+    data: JSON.stringify(agoraDTO),
+    contentType: "application/json; charset=utf-8",
+    headers: {
+        "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+    },
+    success: function (response) {
+        rtmToken = response;
+    },
+    error: function (rs) {
+        console.error(rs.status);
+        console.error(rs.responseText);
+    }
+});
 
 // audio and video streams (ours)
 let localTracks = [];
@@ -49,13 +100,42 @@ let localScreenTracks;
 // don't share screen right away
 let sharingScreen = false;
 
+// join room with a specific user
 let joinRoomInit = async () => {
+    console.log("Joining room ");
+    console.log(uid);
+    let id = uid.toString();
+
+    rtmClient = await AgoraRTM.createInstance(APP_ID);
+    await rtmClient.login({uid: id, token: rtmToken});
+
+    console.log("SUCCESSFUL LOGIN"  );
+    console.log("CURRENT USER: ");
+    console.log(currentLoggedInUser.name);
+
+    // Save user's name for access by others later
+    await rtmClient.addOrUpdateLocalUserAttributes({'name': currentLoggedInUser.name});
+
+    channel = await rtmClient.createChannel(roomId);
+    await channel.join();
+
+    console.log("Joined channel");
+
+    channel.on('MemberJoined', handleMemberJoined);
+    channel.on('MemberLeft', handleMemberLeft);
+    channel.on('ChannelMessage', handleChannelMessage);
+
+    console.log("Listeners on for member joined and left");
+
+    getMembers();
+    addBotMessageToDom(`Welcome to the room ${currentLoggedInUser.name}! 👋`)
+
     client = AgoraRTC.createClient({
         mode: 'rtc',
         codec: 'vp8'
     });
 
-    await client.join(APP_ID, roomId, token, uid);
+    await client.join(APP_ID, roomId, rtcToken, uid);
 
     client.on('user-published', handleUserPublished);
     client.on('user-left', handleUserLeft);
