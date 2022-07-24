@@ -14,4 +14,6 @@ public class HomeController {
     public String getHomePage(){
         return "index";
     }
+    @GetMapping("/subject")
+    public String getSubjectPage() { return "subject"; }
 }

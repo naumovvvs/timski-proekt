@@ -23,7 +23,7 @@ if(localStorage.getItem("accessToken") === null) {
                 <div class="card" style="width: 18rem;">
                     <img src="${element.imageUrl}" class="card-img-top border-bottom" style="height:150px; width:100%; object-fit: cover;">
                     <div class="card-body" style="height: 100px;">
-                        <h5 class="text-primary"><a href="#">${element.name}</a></h5>
+                        <h5 class="text-primary course-title"><a href="http://localhost:8080/subject">${element.name}</a></h5>
                     </div>
                 </div>
             </div>`
@@ -51,13 +51,14 @@ if(localStorage.getItem("accessToken") === null) {
                         "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
                 },
                 success: function (response) {
+                    console.log(response);
                     response.forEach((element) => {
                         let subjectContent = $("#subject-content");
                         let card = `<div class="col-md-3 py-3">
                 <div class="card" style="width: 18rem;">
                     <img src="${element.imageUrl}" class="card-img-top border-bottom" style="height:150px; width:100%; object-fit: cover;">
                     <div class="card-body" style="height: 100px;">
-                        <h5 class="text-primary"><a href="#">${element.name}</a></h5>
+                        <h5 class="text-primary course-title"><a href="http://localhost:8080/subject">${element.name}</a></h5>
                     </div>
                 </div>
             </div>`
@@ -72,4 +73,8 @@ if(localStorage.getItem("accessToken") === null) {
 $("#logout").on("click", function(){
     window.localStorage.clear();
     window.location.reload();
+});
+
+$(".course-title").on("click", function(){
+    window.localStorage.setItem('courseTitle', $(this).text());
 });

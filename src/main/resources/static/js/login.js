@@ -1,3 +1,14 @@
+if(localStorage.getItem("accessToken") === null){
+   $("#login").removeClass("d-none");
+   $("#logout").addClass("d-none");
+   $("#loggedUserName").addClass("d-none");
+   $("#notLogged").removeClass("d-none");
+}else{
+   $("#login").addClass("d-none");
+   $("#logout").removeClass("d-none");
+   $("#notLogged").addClass("d-none");
+   $("#loggedUserName").removeClass("d-none");
+}
 document.getElementById("loginForm").addEventListener("submit", function (e) {
    e.preventDefault();
 
