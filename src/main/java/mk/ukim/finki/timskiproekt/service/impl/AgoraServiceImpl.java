@@ -19,10 +19,6 @@ public class AgoraServiceImpl implements AgoraService {
     static String appCertificate = "17949a1407ec4dc9b365ca950f99e9e2";
     static int expirationTimeInSeconds = 36000;
 
-    //static String channelName = "7d72365eb983485397e3e3f9d460bdda";
-    //static String userAccount = "2082341273";
-    //static int uid = 2082341273;
-
     @Override
     public String createRTCToken(Long roomId, Long userId) {
         log.info("Creating RTC token for user: {}, trying to join in room: {}", userId, roomId);
@@ -42,12 +38,11 @@ public class AgoraServiceImpl implements AgoraService {
 
     @Override
     public String createRTMToken(Long userId) throws Exception {
+        log.info("Creating RTM token for user: {}", userId);
         int expireTimestamp = 0;
-
         RtmTokenBuilder token = new RtmTokenBuilder();
-        String result = token.buildToken(appId, appCertificate, String.valueOf(userId),
+
+        return token.buildToken(appId, appCertificate, String.valueOf(userId),
                 RtmTokenBuilder.Role.Rtm_User, expireTimestamp);
-        System.out.println(result);
-        return result;
     }
 }

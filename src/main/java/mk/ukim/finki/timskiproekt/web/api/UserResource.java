@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mk.ukim.finki.timskiproekt.model.AppUser;
 import mk.ukim.finki.timskiproekt.model.Role;
+import mk.ukim.finki.timskiproekt.model.Student;
 import mk.ukim.finki.timskiproekt.model.dto.*;
 import mk.ukim.finki.timskiproekt.service.AgoraService;
+import mk.ukim.finki.timskiproekt.service.StudentService;
 import mk.ukim.finki.timskiproekt.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +38,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 @RequiredArgsConstructor
 public class UserResource {
     private final UserService userService;
+    private final StudentService studentService;
     private final AgoraService agoraService;
     private final ModelMapper modelMapper;
 
@@ -46,6 +49,22 @@ public class UserResource {
         AppUser appUser = this.userService.getUser(username);
 
         return ResponseEntity.ok().body(modelMapper.map(appUser, UserDTO.class));
+    }
+
+    @GetMapping("/student/current")
+    public ResponseEntity<StudentDTO> getCurrentStudent() {
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        AppUser appUser = this.userService.getUser(username);
+        Student student;
+
+        try {
+            student = this.studentService.getStudentById(appUser.getId());
+        } catch (Exception ex) {
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.ok().body(modelMapper.map(student, StudentDTO.class));
     }
 
     @PostMapping("/agora/generate-rtc-token")

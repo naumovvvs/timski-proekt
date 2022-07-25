@@ -47,6 +47,7 @@ let expandVideoFrame = (e) => {
   displayFrame.appendChild(e.currentTarget);
   userIdInDisplayFrame = e.currentTarget.id;
 
+  // make other user's streams smaller
   for (let i=0; i<videoFrames.length; i++) {
     if(videoFrames[i].id !== userIdInDisplayFrame) {
       videoFrames[i].style.height = '100px';
@@ -55,6 +56,7 @@ let expandVideoFrame = (e) => {
   }
 }
 
+// add event listeners to all video frames for expanding video
 for (let i=0; i<videoFrames.length; i++) {
   videoFrames[i].addEventListener('click', expandVideoFrame);
 }
@@ -67,6 +69,7 @@ let hideDisplayFrame = () => {
   let child = displayFrame.children[0];
   document.getElementById('streams__container').appendChild(child);
 
+  // make user's streams bigger after clicking on presenter's screen (un-expand)
   for(let i=0; i<videoFrames.length; i++) {
     videoFrames[i].style.height = "300px";
     videoFrames[i].style.width = "300px";
