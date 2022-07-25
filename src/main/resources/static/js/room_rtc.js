@@ -194,7 +194,6 @@ let joinAudioStream = async () => {
 
     // [0]-audio track, [1]-video track
     await localTracks[0].setEnabled(true);
-    await localTracks[0].play();
 
     await client.publish([localTracks[0]]);
 }
@@ -281,7 +280,6 @@ let toggleMic = async (e) => {
     // check if this is the first time turning on the microphone
     // if yes, create audio stream
     if(localTracks[0] === undefined) {
-        console.log("Track 0 undefineeeeddd");
         await joinAudioStream();
         button.classList.add('active');
         return;
