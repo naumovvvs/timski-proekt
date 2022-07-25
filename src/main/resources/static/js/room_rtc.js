@@ -190,7 +190,7 @@ let joinVideoStream = async () => {
 
 let joinAudioStream = async () => {
     // create local track for audio
-    localTracks[0] = await AgoraRTC.createMicrophoneAudioTrack();
+    localTracks[0] = await AgoraRTC.createMicrophoneAudioTrack({AEC: true, ANS:true, encoderConfig: "high_quality"});
 
     // [0]-audio track, [1]-video track
     await localTracks[0].setEnabled(true);
