@@ -157,6 +157,7 @@ let joinRoomInit = async () => {
 
     // event listener for AgoraRTC
     client.on('user-published', handleUserPublished);
+    client.on('user-unpublished', handleUserUnpublished);
     client.on('user-left', handleUserLeft);
 }
 
@@ -198,26 +199,9 @@ let joinAudioStream = async () => {
     await client.publish([localTracks[0]]);
 }
 
-let switchToCamera = async () => {
-    let player = `<div class="video__container" id="user-container-${uid}">
-                        <div class="video-player" id="user-${uid}"></div>
-                  </div>`;
-
-    // add player to the DOM
-    document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
-    // event listener for when user clicks, expand the video to presenter mode (full screen)
-    document.getElementById(`user-container-${uid}`).addEventListener('click', expandVideoFrame);
-
-    // [0]-audio track, [1]-video track
-    if(localTracks[1] !== undefined){
-        localTracks[1].play(`user-${uid}`);
-    }
-}
-
 let handleUserPublished = async (user, mediaType) => {
 
-    console.log("USER PUBLISHED stream, client: " + uid);
-
+    console.log("Remote user published stream, client: " + uid + ", remote: " + user.uid);
     remoteUsers[user.uid] = user;
 
     // subscribe to current user's stream
@@ -253,13 +237,21 @@ let handleUserPublished = async (user, mediaType) => {
     }
 }
 
+let handleUserUnpublished = async (user, mediaType) => {
+    console.log("Unsubscribe from user: " + user.uid + ", media type: " + mediaType);
+    await client.unsubscribe(user,mediaType);
+}
+
 let handleUserLeft = async (user) => {
-    console.log("USER LEFT");
+    console.log("User: " + user.id + ", left the room!");
 
     // delete user from object of users
     delete remoteUsers[user.uid];
     // remove user video container
-    document.getElementById(`user-container-${user.uid}`).remove();
+    let el = document.getElementById(`user-container-${user.uid}`);
+    if(el!==null) {
+        el.remove();
+    }
 
     // when user leaves, if he was the presenter, remove him from stream box (presenter)
     // and the make the other participant's screens bigger (because presenter left)
@@ -313,12 +305,14 @@ let toggleCamera = async (e) => {
         // turn on camera
         button.classList.add('active');
         await localTracks[1].setEnabled(true);
+        // hide user icon and start local playback
+        await localTracks[1].play(`user-${uid}`);
     } else {
         // turn off camera
         button.classList.remove('active');
         await localTracks[1].setEnabled(false);
-        // change black screen to user icon
-        document.getElementById(`user-container-${uid}`).children[0].style.backgroundColor = "none";
+        // stop local playback and show user icon
+        await localTracks[1].stop();
     }
 }
 
@@ -386,7 +380,8 @@ let toggleScreen = async (e) => {
         await client.unpublish([localScreenTracks]);
         displayFrame.style.display = 'none';
 
-        await switchToCamera();
+        // reset local camera track and create it again on next camera button click
+        localTracks[1] = undefined;
 
         // set participants video stream boxes to 300px (because someone stopped screen sharing)
         let videoFrames = document.getElementsByClassName('video__container');
