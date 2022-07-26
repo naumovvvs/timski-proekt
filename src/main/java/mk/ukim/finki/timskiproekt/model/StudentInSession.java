@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -26,9 +27,14 @@ public class StudentInSession {
     @Enumerated(value = EnumType.STRING)
     private StudentStatus status;
 
+    private LocalDateTime enterTime;
+
+    private LocalDateTime leaveTime;
+
     public StudentInSession(Session session, Student student) {
         this.session = session;
         this.student = student;
         this.status = StudentStatus.UNIDENTIFIED;
+        this.enterTime = LocalDateTime.now();
     }
 }

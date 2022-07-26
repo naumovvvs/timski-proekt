@@ -16,4 +16,9 @@ public class HomeController {
     }
     @GetMapping("/subject")
     public String getSubjectPage() { return "subject"; }
+
+    @GetMapping("/room")
+    public String getRoomPage() {
+        return "room";
+    }
 }
