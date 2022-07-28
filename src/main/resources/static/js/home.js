@@ -41,7 +41,11 @@ if(localStorage.getItem("accessToken") === null) {
                 "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
         },
         success: function (response) {
-            console.log(response)
+            if(response.roles[0].name == "ROLE_PROFESSOR") {
+                $("#addCourse").removeClass("d-none");
+            } else{
+                $("#addCourse").addClass("d-none");
+            }
             $.ajax({
                 type: "GET",
                 url: "/api/student/all-courses/" + response.id,
@@ -77,4 +81,35 @@ $("#logout").on("click", function(){
 
 $(".course-title").on("click", function(){
     window.localStorage.setItem('courseTitle', $(this).text());
+});
+
+$("#saveCourse").on("click", function(){
+    let name = $("#courseName").val();
+    let code = $("#courseCode").val();
+    let imgURL = $("#courseImg").val();
+    let semester = $('#semester').find(":selected").val();
+    let courseObject = {
+        name: name,
+        code: code,
+        imgURL: imgURL,
+        semester: semester
+    }
+    console.log(courseObject);
+    $.ajax({
+        url: "/api/course/create",
+        type: "POST",
+        data: JSON.stringify(courseObject),
+        contentType: "application/json",
+        headers: {
+            "Authorization":
+                "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
+        },
+        success: function (data, response) {
+            console.log(response);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
 });
