@@ -75,19 +75,24 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public Session addStudentInSession(Long studentId, Long sessionId) {
         Session session = this.getSession(sessionId);
-        Optional<AppUser> appUser = this.studentRepository.findById(studentId);
-        if (appUser.isPresent()) {
-            StudentInSession studentInSession = new StudentInSession(session, (Student) appUser.get());
-            session.getStudents().add(studentInSession);
-        /*
-            TODO:
-             Test if the newly created object (studentInSession) is saved in its own table,
-             when saving it in the container (session).
-        */
-            log.info("Adding student with id: {}, in session with id: {}", studentId, sessionId);
-            return this.sessionRepository.save(session);
+        // get the room associated with this session
+        Room room = roomRepository.findBySession(session);
+        // check if the student is allowed in the room
+        if (room.getAllowedStudents().stream().anyMatch(student -> student.getId().equals(studentId))) {
+            Optional<AppUser> appUser = this.studentRepository.findById(studentId);
+            if (appUser.isPresent()) {
+                StudentInSession studentInSession = new StudentInSession(session, (Student) appUser.get());
+                session.getStudents().add(studentInSession);
+                /*
+                    TODO:
+                     Test if the newly created object (studentInSession) is saved in its own table,
+                     when saving it in the container (session).
+                */
+                log.info("Adding student with id: {}, in session with id: {}", studentId, sessionId);
+                return this.sessionRepository.save(session);
+            }
         }
-        throw new RuntimeException(String.format("Student with id: %d not found!", studentId));
+        throw new RuntimeException(String.format("Student with id: %d can't join session with id: %d!", studentId, sessionId));
     }
 
     @Override
