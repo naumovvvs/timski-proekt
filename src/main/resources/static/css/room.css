@@ -68,6 +68,30 @@
   background-color: #2aca3e;
 }
 
+.red__icon {
+  display: block;
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background-color: #ff0000;
+}
+
+.orange__icon {
+  display: block;
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background-color: #FFA500;
+}
+
+.mod__icon {
+  display: block;
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background-color: #6a0dad;
+}
+
 .member_name{
   font-size: 14px;
   line-height: 0;
