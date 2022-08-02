@@ -13,6 +13,6 @@ public interface ChatService {
     void clearChat(Long chatId);
     Message pinMessageById(Long messageId, Long chatId);
     void clearPinnedMessage(Long chatId);
-    Message saveMessageToChat(Long chatId, SaveMessageDto messageDto);
+    Message saveMessageToChatByRoom(Long roomId, SaveMessageDto messageDto);
     List<Message> getAllMessagesFromChat(Long chatId);
 }

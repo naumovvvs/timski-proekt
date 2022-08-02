@@ -61,6 +61,7 @@ public class TimskiProektApplication {
             courseService.createCourse(new CourseDTO("Бази на податоци", "DB001", "https://miro.medium.com/max/1400/1*mLqtKV1FjUg-WKlLW-cXjQ.jpeg", Semester.WINTER));
             courseService.createCourse(new CourseDTO("Веб дизајн", "WD001", "https://99designs-blog.imgix.net/blog/wp-content/uploads/2018/09/WHAT-IS-WEB-DESIGN.jpg?auto=format&q=60&w=1860&h=1395&fit=crop&crop=faces", Semester.SUMMER));
             studentService.addCourseToStudent(km, 3L);
+            studentService.addCourseToStudent(km, 2L);
             Room s1 = roomService.create(new SaveRoomDto("Испит - Компјутерски Мрежи", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ));
             Room s2 = roomService.create(new SaveRoomDto("Предавања", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ));
             courseService.addRoomToCourse(s1, "KM001");

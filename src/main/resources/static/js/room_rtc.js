@@ -118,6 +118,9 @@ $.ajax({
     }
 });
 
+// session end url
+let sessionEndURL = "/api/session/end/" + roomId;
+
 // join room with a specific user
 let joinRoomInit = async () => {
     console.log("Joining room, user: " + uid);
@@ -159,6 +162,50 @@ let joinRoomInit = async () => {
     client.on('user-published', handleUserPublished);
     client.on('user-unpublished', handleUserUnpublished);
     client.on('user-left', handleUserLeft);
+
+    // check if this is the start of the session
+    let members = await channel.getMembers();
+    // console.log(members.length)
+    if (members.length === 1) {
+        // create session for this room
+        $.ajax({
+            type: "GET",
+            url: "/api/session/add/" + roomId,
+            headers: {
+                "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+            },
+            success: function (response) {
+                console.log(response);
+                createStudentInSessionRelationship();
+            },
+            error: function (rs) {
+                console.error(rs.status);
+                console.error(rs.responseText);
+            }
+        });
+    } else {
+        await createStudentInSessionRelationship();
+    }
+}
+
+// for this room and the corresponding session link the user with new relationship instance
+let createStudentInSessionRelationship = async () => {
+    if (currentLoggedInStudent) {
+        $.ajax({
+            type: "GET",
+            url: "/api/session/add-student/" + roomId + "/" + uid,
+            headers: {
+                "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+            },
+            success: function (response) {
+                console.log(response);
+            },
+            error: function (rs) {
+                console.error(rs.status);
+                console.error(rs.responseText);
+            }
+        });
+    }
 }
 
 let joinVideoStream = async () => {
@@ -243,7 +290,7 @@ let handleUserUnpublished = async (user, mediaType) => {
 }
 
 let handleUserLeft = async (user) => {
-    console.log("User: " + user.id + ", left the room!");
+    console.log("User: " + user.uid + ", left the room!");
 
     // delete user from object of users
     delete remoteUsers[user.uid];
@@ -264,6 +311,22 @@ let handleUserLeft = async (user) => {
             videoFrames[i].style.width = "300px";
         }
     }
+
+    // update the "leave-time" in the database
+    $.ajax({
+        type: "GET",
+        url: "/api/session/leave-student/" + roomId + "/" + user.uid,
+        headers: {
+            "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+        },
+        success: function (response) {
+            console.log(response);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
 }
 
 let toggleMic = async (e) => {
@@ -394,9 +457,32 @@ let toggleScreen = async (e) => {
     }
 }
 
+let endSession = async (e) => {
+    // update the session's "end-time" in the database
+    $.ajax({
+        type: "GET",
+        url: sessionEndURL,
+        headers: {
+            "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+        },
+        success: function (response) {
+            console.log(response);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
+}
+
+let changeStudentStatus = async (e) => {
+    console.log("ok")
+}
+
 document.getElementById('mic-btn').addEventListener('click', toggleMic);
 document.getElementById('camera-btn').addEventListener('click', toggleCamera);
 document.getElementById('screen-btn').addEventListener('click', toggleScreen);
+document.getElementById('end__room__btn').addEventListener('click', endSession);
 
 joinRoomInit();
 

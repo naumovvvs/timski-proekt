@@ -92,9 +92,21 @@
   background-color: #6a0dad;
 }
 
+.gray__icon {
+  display: block;
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background-color: #bdbdbd;
+}
+
 .member_name{
   font-size: 14px;
   line-height: 0;
+}
+
+.member_name:hover{
+  cursor: pointer;
 }
 
 #messages__container {

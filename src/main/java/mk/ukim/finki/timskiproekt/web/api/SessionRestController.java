@@ -5,7 +5,6 @@ import mk.ukim.finki.timskiproekt.model.Chat;
 import mk.ukim.finki.timskiproekt.model.Session;
 import mk.ukim.finki.timskiproekt.model.Student;
 import mk.ukim.finki.timskiproekt.model.dto.EditStudentStatusDto;
-import mk.ukim.finki.timskiproekt.model.dto.SaveSessionDto;
 import mk.ukim.finki.timskiproekt.model.enums.SessionStatus;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
 import mk.ukim.finki.timskiproekt.service.SessionService;
@@ -37,9 +36,9 @@ public class SessionRestController {
         return this.sessionService.getSessionStatus(id);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<Session> save(@RequestBody SaveSessionDto sessionDto) {
-        return Optional.of(this.sessionService.create(sessionDto))
+    @GetMapping("/add/{roomId}")
+    public ResponseEntity<Session> save(@PathVariable Long roomId) {
+        return Optional.of(this.sessionService.create(roomId))
                 .map(session -> ResponseEntity.ok().body(session))
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
@@ -85,11 +84,16 @@ public class SessionRestController {
         this.sessionService.editStatusForStudent(id, studentStatusDto);
     }
 
-    @GetMapping("/add-student/{id}/{studentId}")
-    public ResponseEntity<Session> addStudent(@PathVariable Long id, @PathVariable Long studentId) {
-        return Optional.of(this.sessionService.addStudentInSession(studentId, id))
+    @GetMapping("/add-student/{roomId}/{studentId}")
+    public ResponseEntity<Session> addStudent(@PathVariable Long roomId, @PathVariable Long studentId) {
+        return Optional.of(this.sessionService.addStudentInSessionByRoom(studentId, roomId))
                 .map(session -> ResponseEntity.ok().body(session))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/leave-student/{roomId}/{studentId}")
+    public void leaveSession(@PathVariable Long roomId, @PathVariable Long studentId) {
+        this.sessionService.leaveSessionForStudentByRoom(studentId, roomId);
     }
 
     @GetMapping("/get-chat/{id}")
@@ -99,12 +103,12 @@ public class SessionRestController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/end-session/{id}")
-    public void endSession(@PathVariable Long id) {
-        this.sessionService.endSession(id);
+    @GetMapping("/end/{roomId}")
+    public void endSession(@PathVariable Long roomId) {
+        this.sessionService.endSessionByRoom(roomId);
     }
 
-    @GetMapping("/change-session/{id}/{newStatus}")
+    @GetMapping("/change/{id}/{newStatus}")
     public void changeSessionStatus(@PathVariable Long id, @PathVariable String newStatus) {
         this.sessionService.changeSessionStatus(id, SessionStatus.valueOf(newStatus));
     }

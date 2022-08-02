@@ -62,9 +62,9 @@ public class ChatRestController {
         this.chatService.clearPinnedMessage(id);
     }
 
-    @PutMapping("/save-msg/{id}")
-    public ResponseEntity<Message> saveMessage(@PathVariable Long id, @RequestBody SaveMessageDto messageDto) {
-        return Optional.of(this.chatService.saveMessageToChat(id, messageDto))
+    @PostMapping("/save-msg/{roomId}")
+    public ResponseEntity<Message> saveMessage(@PathVariable Long roomId, @RequestBody SaveMessageDto messageDto) {
+        return Optional.of(this.chatService.saveMessageToChatByRoom(roomId, messageDto))
                 .map(message -> ResponseEntity.ok().body(message))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

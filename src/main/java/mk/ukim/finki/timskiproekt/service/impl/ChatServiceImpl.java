@@ -2,15 +2,9 @@ package mk.ukim.finki.timskiproekt.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import mk.ukim.finki.timskiproekt.model.AppUser;
-import mk.ukim.finki.timskiproekt.model.Chat;
-import mk.ukim.finki.timskiproekt.model.Message;
-import mk.ukim.finki.timskiproekt.model.Session;
+import mk.ukim.finki.timskiproekt.model.*;
 import mk.ukim.finki.timskiproekt.model.dto.SaveMessageDto;
-import mk.ukim.finki.timskiproekt.repository.ChatRepository;
-import mk.ukim.finki.timskiproekt.repository.MessageRepository;
-import mk.ukim.finki.timskiproekt.repository.SessionsRepository;
-import mk.ukim.finki.timskiproekt.repository.UserRepository;
+import mk.ukim.finki.timskiproekt.repository.*;
 import mk.ukim.finki.timskiproekt.service.ChatService;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +21,7 @@ public class ChatServiceImpl implements ChatService {
     private final SessionsRepository sessionRepository;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
 
     @Override
     public Chat getChat(Long id) {
@@ -38,8 +33,8 @@ public class ChatServiceImpl implements ChatService {
     public Chat createChatBySessionId(Long sessionId) {
         Optional<Session> session = this.sessionRepository.findById(sessionId);
         if (session.isPresent()) {
-            log.info("Creating chat for session: {}", session.get().getName());
-            return this.chatRepository.save(new Chat(null, null, new ArrayList<>(), session.get()));
+            log.info("Creating chat for session with id: {}", sessionId);
+            return this.chatRepository.save(new Chat(null, null, new ArrayList<>()));
         }
         throw new RuntimeException(String.format("Session with id: %d not found!", sessionId));
     }
@@ -97,16 +92,15 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Message saveMessageToChat(Long chatId, SaveMessageDto messageDto) {
-        Optional<Chat> optChat = this.chatRepository.findById(chatId);
+    public Message saveMessageToChatByRoom(Long roomId, SaveMessageDto messageDto) {
+        Optional<Room> optRoom = this.roomRepository.findById(roomId);
         Optional<AppUser> optUser = this.userRepository.findById(messageDto.getSenderId());
-        if(optChat.isPresent() && optUser.isPresent()) {
-            Chat chat = optChat.get();
+        if(optRoom.isPresent() && optUser.isPresent()) {
+            Chat chat = optRoom.get().getSession().getChat();
             Message message = new Message(messageDto.getContent(), chat, optUser.get());
-            chat.getMessages().add(message);
-            this.chatRepository.save(chat);
+            this.messageRepository.save(message);
 
-            log.info("Saving new message from sender: {}, to chat: {}", message.getSender().getName(), chatId);
+            log.info("Saving new message from sender: {}, to chat: {}", message.getSender().getName(), chat.getId());
             return message;
         }
         throw new RuntimeException("Cannot save message to chat");

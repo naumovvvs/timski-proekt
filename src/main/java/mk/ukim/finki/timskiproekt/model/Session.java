@@ -1,5 +1,6 @@
 package mk.ukim.finki.timskiproekt.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -21,27 +23,23 @@ public class Session {
     private Long id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    @Column(unique=true)
-    private String name;
-    private String code;
+    private UUID code;
 
     @Enumerated(value = EnumType.STRING)
     private SessionStatus status;
 
-    @OneToOne
-    private Room room;
-
+    @JsonIgnore
     @OneToMany(mappedBy = "session", fetch = FetchType.LAZY)
-    private List<StudentInSession> students = new ArrayList<>();
+    private List<StudentInSession> students;
 
     @OneToOne
     private Chat chat;
 
-    public Session(String name, String code, Room room) {
+    public Session(Chat chat) {
         this.startTime = LocalDateTime.now();
-        this.name = name;
-        this.code = code;
+        this.code = UUID.randomUUID();
         this.status = SessionStatus.OPEN;
-        this.room = room;
+        this.students = new ArrayList<>();
+        this.chat = chat;
     }
 }

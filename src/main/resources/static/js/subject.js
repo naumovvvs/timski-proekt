@@ -54,7 +54,7 @@ $("#saveRoom").on("click", function(){
         courseId: 1,
         moderatorId: 4
     }
-    console.log(roomObject);
+    // console.log(roomObject);
     $.ajax({
         url: "api/room/add",
         type: "POST",
@@ -66,6 +66,11 @@ $("#saveRoom").on("click", function(){
         },
         success: function (data, response) {
             console.log(response);
+            $("#roomName").val("");
+            $("#dateStart").val("");
+            $("#dateEnd").val("");
+            $('#addRoomModal').modal('hide');
+            location.reload();
         },
         error: function (rs) {
             console.error(rs.status);

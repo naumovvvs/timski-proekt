@@ -1,14 +1,12 @@
 package mk.ukim.finki.timskiproekt.service.impl;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mk.ukim.finki.timskiproekt.model.*;
 import mk.ukim.finki.timskiproekt.model.dto.EditStudentStatusDto;
-import mk.ukim.finki.timskiproekt.model.dto.SaveSessionDto;
 import mk.ukim.finki.timskiproekt.model.enums.SessionStatus;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
-import mk.ukim.finki.timskiproekt.repository.RoomRepository;
-import mk.ukim.finki.timskiproekt.repository.SessionsRepository;
-import mk.ukim.finki.timskiproekt.repository.StudentRepository;
+import mk.ukim.finki.timskiproekt.repository.*;
 import mk.ukim.finki.timskiproekt.service.SessionService;
 import org.springframework.stereotype.Service;
 
@@ -21,19 +19,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class SessionServiceImpl implements SessionService {
 
     private final SessionsRepository sessionRepository;
     private final RoomRepository roomRepository;
     private final StudentRepository studentRepository;
-
-    public SessionServiceImpl(SessionsRepository sessionRepository,
-                              RoomRepository roomRepository,
-                              StudentRepository studentRepository) {
-        this.sessionRepository = sessionRepository;
-        this.roomRepository = roomRepository;
-        this.studentRepository = studentRepository;
-    }
+    private final StudentInSessionRepository studentInSessionRepository;
+    private final ChatRepository chatRepository;
 
     @Override
     public Session getSession(Long id) {
@@ -50,8 +43,9 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public List<Student> getAllowedStudentsBySession(Long id) {
+        Session session = this.getSession(id);
         log.info("Getting allowed students for session with id: {}", id);
-        return this.getSession(id).getRoom().getAllowedStudents();
+        return this.roomRepository.findBySession(session).getAllowedStudents();
     }
 
     @Override
@@ -73,26 +67,32 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public Session addStudentInSession(Long studentId, Long sessionId) {
-        Session session = this.getSession(sessionId);
+    public Session addStudentInSessionByRoom(Long studentId, Long roomId) {
         // get the room associated with this session
-        Room room = roomRepository.findBySession(session);
+        Room room = this.roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException(String.format("Room with id: %d not found!", roomId)));
+        Session session = room.getSession();
         // check if the student is allowed in the room
-        if (room.getAllowedStudents().stream().anyMatch(student -> student.getId().equals(studentId))) {
+        //  if (room.getAllowedStudents().stream().anyMatch(student -> student.getId().equals(studentId))) {
             Optional<AppUser> appUser = this.studentRepository.findById(studentId);
             if (appUser.isPresent()) {
                 StudentInSession studentInSession = new StudentInSession(session, (Student) appUser.get());
-                session.getStudents().add(studentInSession);
                 /*
                     TODO:
                      Test if the newly created object (studentInSession) is saved in its own table,
                      when saving it in the container (session).
+
+                     Update: must be saved in it's own table first.
                 */
-                log.info("Adding student with id: {}, in session with id: {}", studentId, sessionId);
+                this.studentInSessionRepository.save(studentInSession);
+
+                session.getStudents().add(studentInSession);
+                log.info("Adding student with id: {}, in session with id: {}", studentId, session.getId());
                 return this.sessionRepository.save(session);
             }
-        }
-        throw new RuntimeException(String.format("Student with id: %d can't join session with id: %d!", studentId, sessionId));
+        //}
+        throw new RuntimeException(String.format("Student with id: %d can't join session with id: %d!",
+                studentId, session.getId()));
     }
 
     @Override
@@ -119,17 +119,34 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    public void leaveSessionForStudentByRoom(Long studentId, Long roomId) {
+        Room room = this.roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException(String.format("Room with id: %d not found!", roomId)));
+        Optional<AppUser> appUser = this.studentRepository.findById(studentId);
+        if(appUser.isPresent()) {
+            if (appUser.get().getRoles().stream().allMatch(role -> role.getName().equals("ROLE_STUDENT"))) {
+                StudentInSession studentInSession = this.studentInSessionRepository
+                        .findStudentInSessionBySessionAndStudent(room.getSession(), (Student) appUser.get());
+                studentInSession.setLeaveTime(LocalDateTime.now());
+                this.studentInSessionRepository.save(studentInSession);
+            }
+        }
+    }
+
+    @Override
     public Chat getChatBySession(Long id) {
         log.info("Getting chat by session id: {}", id);
         return this.getSession(id).getChat();
     }
 
     @Override
-    public void endSession(Long id) {
-        Session session = this.getSession(id);
+    public void endSessionByRoom(Long roomId) {
+        Room room = this.roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException(String.format("Room with id: %d not found!", roomId)));
+        Session session = room.getSession();
         session.setStatus(SessionStatus.CLOSED);
         session.setEndTime(LocalDateTime.now());
-        log.info("Ending session with id: {}", id);
+        log.info("Ending session with id: {}", session.getId());
         this.sessionRepository.save(session);
     }
 
@@ -142,13 +159,17 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public Session create(SaveSessionDto sessionDto) {
-        Room room = this.roomRepository.findById(sessionDto.getRoomId())
-                .orElseThrow(() ->
-                        new RuntimeException(String.format("Room with id: %d not found!", sessionDto.getRoomId())));
-        Session session = new Session(sessionDto.getName(), sessionDto.getCode(), room);
+    public Session create(Long roomId) {
+        Room room = this.roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException(String.format("Room with id: %d not found!", roomId)));
         log.info("Creating session for room with id: {}", room.getId());
-        return this.sessionRepository.save(session);
+        Chat chat = new Chat();
+        this.chatRepository.save(chat);
+        Session session = new Session(chat);
+        this.sessionRepository.save(session);
+        room.setSession(session);
+        this.roomRepository.save(room);
+        return session;
     }
 
     @Override
