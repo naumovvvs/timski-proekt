@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ChatService {
     Chat getChat(Long id);
-    Chat createChatBySessionId(Long sessionId);
+    Chat createChatByRoomId(Long roomId);
     Message getPinnedMessageByChat(Long chatId);
     void clearChat(Long chatId);
     Message pinMessageById(Long messageId, Long chatId);

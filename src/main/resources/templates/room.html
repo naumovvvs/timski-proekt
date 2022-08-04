@@ -10,9 +10,9 @@
     <style>
         ul.dropdown-menu {
             margin-top: -2px;
-            display: none;
             list-style: none;
             margin-bottom: -10px;
+            visibility: hidden;
         }
         ul.dropdown-menu button {
             font-weight: 500;
@@ -24,8 +24,8 @@
         }
 
         .member__wrapper:hover > ul.dropdown-menu {
-            display: block;
             list-style: none;
+            visibility: visible;
         }
     </style>
 </head>
@@ -64,16 +64,6 @@
             </div>
 
             <div id="member__list">
-
-                    <div class="member__wrapper" id="member__0__wrapper">
-                        <span class="gray__icon"></span>
-                        <p class="member_name">Test</p>
-                        <ul class="dropdown-menu">
-                            <li onclick=changeStudentStatus() class="student_status"><button id="status_identify" style="background-color: #2aca3e">Identify</button></li>
-                            <li onclick=changeStudentStatus() class="student_status"><button id="status_watch" style="background-color: #FFA500">Watch</button></li>
-                            <li onclick=changeStudentStatus() class="student_status"><button id="status_block" style="background-color: #ff0000">Block</button></li>
-                        </ul>
-                    </div>
 
             </div>
 
@@ -130,7 +120,7 @@
             </section>
         </div>
     </main>
-    
+
 </body>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

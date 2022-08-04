@@ -118,8 +118,8 @@ $.ajax({
     }
 });
 
-// session end url
-let sessionEndURL = "/api/session/end/" + roomId;
+// room end url
+let roomEndURL = "/api/room/end/" + roomId;
 
 // join room with a specific user
 let joinRoomInit = async () => {
@@ -163,20 +163,20 @@ let joinRoomInit = async () => {
     client.on('user-unpublished', handleUserUnpublished);
     client.on('user-left', handleUserLeft);
 
-    // check if this is the start of the session
+    // check if this is the start of the room
     let members = await channel.getMembers();
     // console.log(members.length)
     if (members.length === 1) {
-        // create session for this room
+        // start this room
         $.ajax({
             type: "GET",
-            url: "/api/session/add/" + roomId,
+            url: "/api/room/open/" + roomId,
             headers: {
                 "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
             },
             success: function (response) {
                 console.log(response);
-                createStudentInSessionRelationship();
+                createStudentInRoomRelationship();
             },
             error: function (rs) {
                 console.error(rs.status);
@@ -184,16 +184,16 @@ let joinRoomInit = async () => {
             }
         });
     } else {
-        await createStudentInSessionRelationship();
+        await createStudentInRoomRelationship();
     }
 }
 
-// for this room and the corresponding session link the user with new relationship instance
-let createStudentInSessionRelationship = async () => {
+// for this room and the corresponding user link the user with new relationship instance
+let createStudentInRoomRelationship = async () => {
     if (currentLoggedInStudent) {
         $.ajax({
             type: "GET",
-            url: "/api/session/add-student/" + roomId + "/" + uid,
+            url: "/api/room/add-student/" + roomId + "/" + uid,
             headers: {
                 "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
             },
@@ -315,7 +315,7 @@ let handleUserLeft = async (user) => {
     // update the "leave-time" in the database
     $.ajax({
         type: "GET",
-        url: "/api/session/leave-student/" + roomId + "/" + user.uid,
+        url: "/api/room/leave-student/" + roomId + "/" + user.uid,
         headers: {
             "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
         },
@@ -457,11 +457,11 @@ let toggleScreen = async (e) => {
     }
 }
 
-let endSession = async (e) => {
-    // update the session's "end-time" in the database
+let endRoom = async (e) => {
+    // update the room's "end-time" in the database
     $.ajax({
         type: "GET",
-        url: sessionEndURL,
+        url: roomEndURL,
         headers: {
             "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
         },
@@ -476,16 +476,58 @@ let endSession = async (e) => {
 }
 
 let changeStudentStatus = async (e) => {
-    console.log("ok")
+    let newStatus = e.target.id;
+    let id = e.target.parentElement.parentElement.parentElement.id;
+    let studentId = id.split("__")[1];
+
+    let dtoData = {
+        studentId: studentId,
+        newStudentStatus: newStatus
+    };
+
+    let newStatusClass;
+    if (newStatus === "IDENTIFIED") {
+        newStatusClass = "green__icon"
+    } else if (newStatus === "SUSPICIOUS") {
+        newStatusClass = "orange__icon";
+    } else {
+        newStatusClass = "red__icon";
+    }
+
+    // console.log(dtoData)
+    let url = "/api/room/edit-student-status/" + roomId;
+
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: JSON.stringify(dtoData),
+        contentType: "application/json",
+        headers: {
+            "Authorization":
+                "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
+        },
+        success: function (data, response) {
+            console.log(response);
+            let span = e.target.parentElement.parentElement.previousElementSibling.previousElementSibling;
+            span.removeAttribute("class");
+            span.classList.add(newStatusClass);
+            // console.log(span);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
+
 }
 
 document.getElementById('mic-btn').addEventListener('click', toggleMic);
 document.getElementById('camera-btn').addEventListener('click', toggleCamera);
 document.getElementById('screen-btn').addEventListener('click', toggleScreen);
-document.getElementById('end__room__btn').addEventListener('click', endSession);
+document.getElementById('end__room__btn').addEventListener('click', endRoom);
+$(".student_status").on('click', changeStudentStatus);
 
 joinRoomInit();
-
 
 
 

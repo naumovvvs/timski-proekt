@@ -31,9 +31,9 @@ public class ChatRestController {
         return this.chatService.getAllMessagesFromChat(id);
     }
 
-    @PostMapping("/add/{sessionId}")
-    public ResponseEntity<Chat> save(@PathVariable Long sessionId) {
-        return Optional.of(this.chatService.createChatBySessionId(sessionId))
+    @PostMapping("/add/{roomId}")
+    public ResponseEntity<Chat> save(@PathVariable Long roomId) {
+        return Optional.of(this.chatService.createChatByRoomId(roomId))
                 .map(chat -> ResponseEntity.ok().body(chat))
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }

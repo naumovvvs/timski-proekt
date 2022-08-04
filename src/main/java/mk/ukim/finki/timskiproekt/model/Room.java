@@ -1,11 +1,10 @@
 package mk.ukim.finki.timskiproekt.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
+import mk.ukim.finki.timskiproekt.model.enums.RoomStatus;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,7 +14,6 @@ import java.util.List;
 @Entity
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class Room {
 
     @Id
@@ -25,6 +23,11 @@ public class Room {
     private String name;
     private LocalDateTime openFrom;
     private LocalDateTime openTo;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
+    @Enumerated(value = EnumType.STRING)
+    private RoomStatus status;
 
     @ManyToOne
     @JsonBackReference
@@ -37,17 +40,41 @@ public class Room {
     @ManyToOne
     private Professor moderator;
 
-    @OneToOne
-    private Session session;
-
     @ManyToMany
-    private List<Student> allowedStudents = new ArrayList<>();
+    private List<Student> allowedStudents;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    private List<StudentInRoom> students;
+
+    @OneToOne
+    private Chat chat;
+
+    public Room() {
+        this.allowedStudents = new ArrayList<>();
+        this.students = new ArrayList<>();
+    }
 
     public Room(String name, LocalDateTime openFrom, LocalDateTime openTo, Course course, Professor moderator) {
         this.name = name;
         this.openFrom = openFrom;
         this.openTo = openTo;
+        this.status = RoomStatus.CREATED;
+        this.allowedStudents = new ArrayList<>();
+        this.students = new ArrayList<>();
         this.course = course;
         this.moderator = moderator;
+    }
+
+    public Room(String name, LocalDateTime openFrom, LocalDateTime openTo, Course course, Professor moderator, Chat chat) {
+        this.name = name;
+        this.openFrom = openFrom;
+        this.openTo = openTo;
+        this.status = RoomStatus.CREATED;
+        this.allowedStudents = new ArrayList<>();
+        this.students = new ArrayList<>();
+        this.course = course;
+        this.moderator = moderator;
+        this.chat = chat;
     }
 }

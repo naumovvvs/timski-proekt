@@ -12,14 +12,14 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentInSession {
+public class StudentInRoom {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    private Session session;
+    private Room room;
 
     @ManyToOne
     private Student student;
@@ -31,8 +31,8 @@ public class StudentInSession {
 
     private LocalDateTime leaveTime;
 
-    public StudentInSession(Session session, Student student) {
-        this.session = session;
+    public StudentInRoom(Room room, Student student) {
+        this.room = room;
         this.student = student;
         this.status = StudentStatus.UNIDENTIFIED;
         this.enterTime = LocalDateTime.now();

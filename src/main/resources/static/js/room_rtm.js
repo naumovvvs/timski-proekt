@@ -43,9 +43,9 @@ let addMemberToDom = async (MemberId) => {
                         <span class="gray__icon"></span>
                         <p class="member_name">${name} ${pom}</p>
                         <ul class="dropdown-menu">
-                            <li class="student_status"><button id="status_identify" style="background-color: #2aca3e">Identify</button></li>
-                            <li class="student_status"><button id="status_watch" style="background-color: #FFA500">Watch</button></li>
-                            <li class="student_status"><button id="status_block" style="background-color: #ff0000">Block</button></li>
+                            <li onclick="changeStudentStatus(event)" class="student_status"><button id="IDENTIFIED" style="background-color: #2aca3e">Identify</button></li>
+                            <li onclick="changeStudentStatus(event)" class="student_status"><button id="SUSPICIOUS" style="background-color: #FFA500">Watch</button></li>
+                            <li onclick="changeStudentStatus(event)" class="student_status"><button id="BLOCKED" style="background-color: #ff0000">Block</button></li>
                         </ul>
                       </div>`;
     }

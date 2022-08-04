@@ -18,7 +18,6 @@ import java.util.Optional;
 public class ChatServiceImpl implements ChatService {
 
     private final ChatRepository chatRepository;
-    private final SessionsRepository sessionRepository;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
@@ -30,13 +29,13 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat createChatBySessionId(Long sessionId) {
-        Optional<Session> session = this.sessionRepository.findById(sessionId);
-        if (session.isPresent()) {
-            log.info("Creating chat for session with id: {}", sessionId);
+    public Chat createChatByRoomId(Long roomId) {
+        Optional<Room> room = this.roomRepository.findById(roomId);
+        if (room.isPresent()) {
+            log.info("Creating chat for room with id: {}", roomId);
             return this.chatRepository.save(new Chat(null, null, new ArrayList<>()));
         }
-        throw new RuntimeException(String.format("Session with id: %d not found!", sessionId));
+        throw new RuntimeException(String.format("Room with id: %d not found!", roomId));
     }
 
     @Override
@@ -96,7 +95,7 @@ public class ChatServiceImpl implements ChatService {
         Optional<Room> optRoom = this.roomRepository.findById(roomId);
         Optional<AppUser> optUser = this.userRepository.findById(messageDto.getSenderId());
         if(optRoom.isPresent() && optUser.isPresent()) {
-            Chat chat = optRoom.get().getSession().getChat();
+            Chat chat = optRoom.get().getChat();
             Message message = new Message(messageDto.getContent(), chat, optUser.get());
             this.messageRepository.save(message);
 
