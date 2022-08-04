@@ -32,6 +32,9 @@ public interface RoomService {
 
     Room create(SaveRoomDto roomDto);
 
+    // TODO: only for testing purposes (delete later)
+    Room create(SaveRoomDto roomDto, List<Student> allowed);
+
     Room update(Long id, EditRoomDto roomDto);
 
     void delete(Long id);
@@ -51,4 +54,6 @@ public interface RoomService {
     void openRoom(Long roomId);
 
     void changeRoomStatus(Long id, RoomStatus newStatus);
+
+    boolean checkIfStudentIsAllowed(Long roomId, Long studentId);
 }

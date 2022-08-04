@@ -1,9 +1,7 @@
 package mk.ukim.finki.timskiproekt.web;
 
 import lombok.AllArgsConstructor;
-import mk.ukim.finki.timskiproekt.model.AppUser;
-import mk.ukim.finki.timskiproekt.service.UserService;
-import org.springframework.security.core.context.SecurityContextHolder;
+import mk.ukim.finki.timskiproekt.service.RoomService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,19 +14,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 @AllArgsConstructor
 public class HomeController {
 
-    private final UserService userService;
+    private final RoomService roomService;
 
     @GetMapping
-    public String getHomePage(){
+    public String getHomePage() {
         return "index";
     }
+
     @GetMapping("/subject")
-    public String getSubjectPage() { return "subject"; }
+    public String getSubjectPage() {
+        return "subject";
+    }
 
     @GetMapping("/room")
-    public String getRoomPage(@RequestParam(required = false) Long room) {
-        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        AppUser appUser = this.userService.getUser(username);
+    public String getRoomPage(@RequestParam Long room, @RequestParam Long student) {
+        if (!this.roomService.checkIfStudentIsAllowed(room, student)) {
+            return "redirect:/home";
+        }
         return "room";
     }
 }

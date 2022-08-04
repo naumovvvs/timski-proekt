@@ -40,6 +40,7 @@ public class Room {
     @ManyToOne
     private Professor moderator;
 
+    @JsonIgnore
     @ManyToMany
     private List<Student> allowedStudents;
 
@@ -72,6 +73,20 @@ public class Room {
         this.openTo = openTo;
         this.status = RoomStatus.CREATED;
         this.allowedStudents = new ArrayList<>();
+        this.students = new ArrayList<>();
+        this.course = course;
+        this.moderator = moderator;
+        this.chat = chat;
+    }
+
+    // TODO: only for testing purposes (delete later)
+    public Room(String name, LocalDateTime openFrom, LocalDateTime openTo, Course course, Professor moderator, Chat chat,
+                List<Student> allowedStudents) {
+        this.name = name;
+        this.openFrom = openFrom;
+        this.openTo = openTo;
+        this.status = RoomStatus.CREATED;
+        this.allowedStudents = allowedStudents;
         this.students = new ArrayList<>();
         this.course = course;
         this.moderator = moderator;
