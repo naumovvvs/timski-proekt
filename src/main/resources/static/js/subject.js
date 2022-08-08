@@ -11,6 +11,8 @@ if(localStorage.getItem("accessToken") === null){
 }
 
 let loggedInUserId;
+let courseId;
+let isModerator = false;
 // get current logged-in user
 $.ajax({
     url: "/api/user/current",
@@ -21,7 +23,9 @@ $.ajax({
     },
     success: function (response) {
         loggedInUserId = response.id;
-        console.log(loggedInUserId)
+        if(response.roles[0].name == "ROLE_PROFESSOR"){
+            isModerator = true;
+        }
     },
     error: function (rs) {
         console.error(rs.status);
@@ -41,6 +45,8 @@ $.ajax({
             "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
     },
     success: function (response) {
+        courseId = response.id;
+
         $.ajax({
             type: "GET",
             url: "/api/course/all-rooms/" + response.code,
@@ -53,7 +59,7 @@ $.ajax({
                 let roomContent = $(".room-container");
                 response.forEach((element) => {
                     let card = `<div class="d-flex align-items-center my-3"><img src="https://ispiti.finki.ukim.mk/theme/image.php/classic/bigbluebuttonbn/1637703842/icon">
-            <p class="text-primary mx-2 my-0"><a href="http://localhost:8080/room?room=${element.id}&student=${loggedInUserId}" style="text-decoration: none;">${element.name}</a></p></div>`
+                    <p class="text-primary mx-2 my-0"><a href="http://localhost:8080/room?room=${element.id}&student=${loggedInUserId}&isProfessor=${isModerator}" style="text-decoration: none;">${element.name}</a></p></div>`
                     roomContent.append(card);
                 });
             }
@@ -70,8 +76,8 @@ $("#saveRoom").on("click", function(){
         name: roomName,
         openFrom: dateStart,
         openTo: dateEnd,
-        courseId: 1,
-        moderatorId: 4
+        courseId: courseId,
+        moderatorId: loggedInUserId
     }
     // console.log(roomObject);
     $.ajax({

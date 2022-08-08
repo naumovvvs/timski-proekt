@@ -10,13 +10,14 @@ if(localStorage.getItem("accessToken") === null){
     $("#loggedUserName").removeClass("d-none");
 }
 
+let userId = null;
+
 if(localStorage.getItem("accessToken") === null) {
     $.ajax({
         type: "GET",
         url: "/api/course/all-courses",
         async: false,
         success: function (response) {
-            console.log(response);
             response.forEach((element) => {
                 let subjectContent = $("#subject-content");
                 let card = `<div class="col-md-3 py-3">
@@ -41,21 +42,24 @@ if(localStorage.getItem("accessToken") === null) {
                 "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
         },
         success: function (response) {
+            let url;
             if(response.roles[0].name == "ROLE_PROFESSOR") {
                 $("#addCourse").removeClass("d-none");
+                url = "/api/professor/all-courses/";
+                userId = response.id;
             } else{
                 $("#addCourse").addClass("d-none");
+                url = "/api/student/all-courses/"
             }
             $.ajax({
                 type: "GET",
-                url: "/api/student/all-courses/" + response.id,
+                url: url + response.id,
                 async: false,
                 headers: {
                     "Authorization":
                         "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
                 },
                 success: function (response) {
-                    console.log(response);
                     response.forEach((element) => {
                         let subjectContent = $("#subject-content");
                         let card = `<div class="col-md-3 py-3">
@@ -74,6 +78,7 @@ if(localStorage.getItem("accessToken") === null) {
         }
     });
 }
+
 $("#logout").on("click", function(){
     window.localStorage.clear();
     window.location.reload();
@@ -91,10 +96,9 @@ $("#saveCourse").on("click", function(){
     let courseObject = {
         name: name,
         code: code,
-        imgURL: imgURL,
+        imageUrl: imgURL,
         semester: semester
     }
-    console.log(courseObject);
     $.ajax({
         url: "/api/course/create",
         type: "POST",
@@ -104,8 +108,8 @@ $("#saveCourse").on("click", function(){
             "Authorization":
                 "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
         },
-        success: function (data, response) {
-            console.log(response);
+        success: function (data) {
+            addCourseToProfessor(data);
         },
         error: function (rs) {
             console.error(rs.status);
@@ -113,3 +117,33 @@ $("#saveCourse").on("click", function(){
         }
     });
 });
+
+let addCourseToProfessor = (course) => {
+    let courseToProfessor = {
+        courseName: course.name,
+        userId: userId
+    }
+
+    $.ajax({
+        url: "/api/professor/add-course",
+        type: "POST",
+        data: JSON.stringify(courseToProfessor),
+        contentType: "application/json",
+        headers: {
+            "Authorization":
+                "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
+        },
+        success: function () {
+            $("#courseName").val("");
+            $("#courseCode").val("");
+            $("#courseImg").val("");
+            $('#semester').selectedIndex = -1;
+            $('#addCourseModal').modal('hide');
+            location.reload();
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
+}

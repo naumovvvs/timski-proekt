@@ -1,5 +1,6 @@
 package mk.ukim.finki.timskiproekt.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Professor extends AppUser {
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     private List<Course> courses = new ArrayList<>();
 

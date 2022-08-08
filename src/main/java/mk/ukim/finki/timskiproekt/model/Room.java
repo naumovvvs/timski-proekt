@@ -37,6 +37,7 @@ public class Room {
         During an exam one room has one moderator.
         Open for modifications, depending on business logic.
      */
+    @JsonIgnore
     @ManyToOne
     private Professor moderator;
 

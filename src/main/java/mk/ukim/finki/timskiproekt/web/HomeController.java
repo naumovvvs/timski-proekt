@@ -27,8 +27,8 @@ public class HomeController {
     }
 
     @GetMapping("/room")
-    public String getRoomPage(@RequestParam Long room, @RequestParam Long student) {
-        if (!this.roomService.checkIfStudentIsAllowed(room, student)) {
+    public String getRoomPage(@RequestParam Long room, @RequestParam Long student, @RequestParam Boolean isProfessor) {
+        if (!isProfessor && !this.roomService.checkIfStudentIsAllowed(room, student)) {
             return "redirect:/home";
         }
         return "room";

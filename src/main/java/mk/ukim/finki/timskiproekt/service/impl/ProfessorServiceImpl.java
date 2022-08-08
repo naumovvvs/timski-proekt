@@ -29,4 +29,16 @@ public class ProfessorServiceImpl implements ProfessorService {
         log.info("Getting courses for professor by id: {}", professorId);
         return this.getProfessor(professorId).getCourses();
     }
+
+    @Override
+    public Professor addCourseToProfessor(Course course, Long professorId) {
+        Professor prof = (Professor) this.professorRepository.findById(professorId)
+                .orElseThrow(() -> new RuntimeException(String.format("Professor with id: %d not found!", professorId)));
+
+        List<Course> profCourses = prof.getCourses();
+        profCourses.add(course);
+        prof.setCourses(profCourses);
+
+        return this.professorRepository.save(prof);
+    }
 }

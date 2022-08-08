@@ -3,7 +3,7 @@ package mk.ukim.finki.timskiproekt.web.api;
 import lombok.AllArgsConstructor;
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.dto.CourseDTO;
-import mk.ukim.finki.timskiproekt.model.dto.CourseToStudentDTO;
+import mk.ukim.finki.timskiproekt.model.dto.CourseToUserDTO;
 import mk.ukim.finki.timskiproekt.model.dto.StudentDTO;
 import mk.ukim.finki.timskiproekt.service.CourseService;
 import mk.ukim.finki.timskiproekt.service.StudentService;
@@ -35,9 +35,9 @@ public class StudentRestController {
     }
 
     @PostMapping("/add-course")
-    public ResponseEntity<StudentDTO> addCourseToStudent(@RequestBody CourseToStudentDTO csDto) {
+    public ResponseEntity<StudentDTO> addCourseToStudent(@RequestBody CourseToUserDTO csDto) {
         Course course = courseService.getCourseByName(csDto.getCourseName());
-        return ResponseEntity.ok().body(modelMapper.map(studentService.addCourseToStudent(course, csDto.getStudentId()),
+        return ResponseEntity.ok().body(modelMapper.map(studentService.addCourseToStudent(course, csDto.getUserId()),
                 StudentDTO.class));
     }
 

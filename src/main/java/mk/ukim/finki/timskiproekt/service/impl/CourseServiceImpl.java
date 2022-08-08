@@ -47,7 +47,8 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<Room> getAllRoomsByCourse(String courseCode) {
         log.info("Getting all rooms by course: {}", courseCode);
-        return this.courseRepository.findByCode(courseCode).getRooms();
+        Course course = this.courseRepository.findByCode(courseCode);
+        return course.getRooms();
     }
 
     @Override

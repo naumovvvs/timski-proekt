@@ -107,8 +107,15 @@ public class RoomServiceImpl implements RoomService {
         Chat chat = new Chat();
         this.chatRepository.save(chat);
         Room room = new Room(roomDto.getName(), roomDto.getOpenFrom(), roomDto.getOpenTo(), course, moderator, chat);
+        this.roomRepository.save(room);
+
+        List<Room> rooms = course.getRooms();
+        rooms.add(room);
+        course.setRooms(rooms);
+        courseRepository.save(course);
+
         log.info("Creating room for course with id: {}, by moderator with id: {}", roomDto.getCourseId(), roomDto.getModeratorId());
-        return this.roomRepository.save(room);
+        return room;
     }
 
     // TODO: only for testing purposes (delete later)

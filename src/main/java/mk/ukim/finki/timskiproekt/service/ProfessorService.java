@@ -9,4 +9,5 @@ public interface ProfessorService {
     Professor getProfessor(Long id);
 
     List<Course> getAllCoursesForProfessor(Long professorId);
+    Professor addCourseToProfessor(Course course, Long professorId);
 }

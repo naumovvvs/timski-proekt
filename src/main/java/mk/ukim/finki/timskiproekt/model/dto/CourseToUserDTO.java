@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CourseToStudentDTO {
+public class CourseToUserDTO {
     private String courseName;
-    private Long studentId;
+    private Long userId;
 }
