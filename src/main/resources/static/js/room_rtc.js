@@ -118,6 +118,9 @@ $.ajax({
     }
 });
 
+// room end url
+let roomEndURL = "/api/room/end/" + roomId;
+
 // join room with a specific user
 let joinRoomInit = async () => {
     console.log("Joining room, user: " + uid);
@@ -159,6 +162,50 @@ let joinRoomInit = async () => {
     client.on('user-published', handleUserPublished);
     client.on('user-unpublished', handleUserUnpublished);
     client.on('user-left', handleUserLeft);
+
+    // check if this is the start of the room
+    let members = await channel.getMembers();
+    // console.log(members.length)
+    if (members.length === 1) {
+        // start this room
+        $.ajax({
+            type: "GET",
+            url: "/api/room/open/" + roomId,
+            headers: {
+                "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+            },
+            success: function (response) {
+                console.log(response);
+                createStudentInRoomRelationship();
+            },
+            error: function (rs) {
+                console.error(rs.status);
+                console.error(rs.responseText);
+            }
+        });
+    } else {
+        await createStudentInRoomRelationship();
+    }
+}
+
+// for this room and the corresponding user link the user with new relationship instance
+let createStudentInRoomRelationship = async () => {
+    if (currentLoggedInStudent) {
+        $.ajax({
+            type: "GET",
+            url: "/api/room/add-student/" + roomId + "/" + uid,
+            headers: {
+                "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+            },
+            success: function (response) {
+                console.log(response);
+            },
+            error: function (rs) {
+                console.error(rs.status);
+                console.error(rs.responseText);
+            }
+        });
+    }
 }
 
 let joinVideoStream = async () => {
@@ -243,7 +290,7 @@ let handleUserUnpublished = async (user, mediaType) => {
 }
 
 let handleUserLeft = async (user) => {
-    console.log("User: " + user.id + ", left the room!");
+    console.log("User: " + user.uid + ", left the room!");
 
     // delete user from object of users
     delete remoteUsers[user.uid];
@@ -264,6 +311,22 @@ let handleUserLeft = async (user) => {
             videoFrames[i].style.width = "300px";
         }
     }
+
+    // update the "leave-time" in the database
+    $.ajax({
+        type: "GET",
+        url: "/api/room/leave-student/" + roomId + "/" + user.uid,
+        headers: {
+            "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+        },
+        success: function (response) {
+            console.log(response);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
 }
 
 let toggleMic = async (e) => {
@@ -394,12 +457,77 @@ let toggleScreen = async (e) => {
     }
 }
 
+let endRoom = async (e) => {
+    // update the room's "end-time" in the database
+    $.ajax({
+        type: "GET",
+        url: roomEndURL,
+        headers: {
+            "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+        },
+        success: function (response) {
+            console.log(response);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
+}
+
+let changeStudentStatus = async (e) => {
+    let newStatus = e.target.id;
+    let id = e.target.parentElement.parentElement.parentElement.id;
+    let studentId = id.split("__")[1];
+
+    let dtoData = {
+        studentId: studentId,
+        newStudentStatus: newStatus
+    };
+
+    let newStatusClass;
+    if (newStatus === "IDENTIFIED") {
+        newStatusClass = "green__icon"
+    } else if (newStatus === "SUSPICIOUS") {
+        newStatusClass = "orange__icon";
+    } else {
+        newStatusClass = "red__icon";
+    }
+
+    // console.log(dtoData)
+    let url = "/api/room/edit-student-status/" + roomId;
+
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: JSON.stringify(dtoData),
+        contentType: "application/json",
+        headers: {
+            "Authorization":
+                "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
+        },
+        success: function (data, response) {
+            console.log(response);
+            let span = e.target.parentElement.parentElement.previousElementSibling.previousElementSibling;
+            span.removeAttribute("class");
+            span.classList.add(newStatusClass);
+            // console.log(span);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
+
+}
+
 document.getElementById('mic-btn').addEventListener('click', toggleMic);
 document.getElementById('camera-btn').addEventListener('click', toggleCamera);
 document.getElementById('screen-btn').addEventListener('click', toggleScreen);
+document.getElementById('end__room__btn').addEventListener('click', endRoom);
+$(".student_status").on('click', changeStudentStatus);
 
 joinRoomInit();
-
 
 
 

@@ -31,9 +31,9 @@ public class ChatRestController {
         return this.chatService.getAllMessagesFromChat(id);
     }
 
-    @PostMapping("/add/{sessionId}")
-    public ResponseEntity<Chat> save(@PathVariable Long sessionId) {
-        return Optional.of(this.chatService.createChatBySessionId(sessionId))
+    @PostMapping("/add/{roomId}")
+    public ResponseEntity<Chat> save(@PathVariable Long roomId) {
+        return Optional.of(this.chatService.createChatByRoomId(roomId))
                 .map(chat -> ResponseEntity.ok().body(chat))
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
@@ -62,9 +62,9 @@ public class ChatRestController {
         this.chatService.clearPinnedMessage(id);
     }
 
-    @PutMapping("/save-msg/{id}")
-    public ResponseEntity<Message> saveMessage(@PathVariable Long id, @RequestBody SaveMessageDto messageDto) {
-        return Optional.of(this.chatService.saveMessageToChat(id, messageDto))
+    @PostMapping("/save-msg/{roomId}")
+    public ResponseEntity<Message> saveMessage(@PathVariable Long roomId, @RequestBody SaveMessageDto messageDto) {
+        return Optional.of(this.chatService.saveMessageToChatByRoom(roomId, messageDto))
                 .map(message -> ResponseEntity.ok().body(message))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

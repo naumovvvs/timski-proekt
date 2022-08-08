@@ -40,8 +40,13 @@ let addMemberToDom = async (MemberId) => {
     } else {
         pom = "(" + studentObj.index + ")";
         memberItem = `<div class="member__wrapper" id="member__${MemberId}__wrapper">
-                        <span class="red__icon"></span>
+                        <span class="gray__icon"></span>
                         <p class="member_name">${name} ${pom}</p>
+                        <ul class="dropdown-menu">
+                            <li onclick="changeStudentStatus(event)" class="student_status"><button id="IDENTIFIED" style="background-color: #2aca3e">Identify</button></li>
+                            <li onclick="changeStudentStatus(event)" class="student_status"><button id="SUSPICIOUS" style="background-color: #FFA500">Watch</button></li>
+                            <li onclick="changeStudentStatus(event)" class="student_status"><button id="BLOCKED" style="background-color: #ff0000">Block</button></li>
+                        </ul>
                       </div>`;
     }
 
@@ -96,11 +101,11 @@ let handleChannelMessage = async (messData, memberId) => {
 
     // if the message is of type 'chat', add it to the DOM
     if(data.type === 'chat') {
-        await addMessageToDom(data.displayName, data.message);
+        await addMessageToDom(data.displayName, data.message, memberId);
     }
 }
 
-let addMessageToDom = async (name, message) => {
+let addMessageToDom = async (name, message, sender) => {
     let messagesWrapper = document.getElementById('messages');
 
     // create new message element
@@ -119,6 +124,31 @@ let addMessageToDom = async (name, message) => {
     if(lastMessage) {
         lastMessage.scrollIntoView();
     }
+
+    // send message to backend
+    let messageDto = {
+        content: message,
+        senderId: sender
+    }
+
+    console.log(messageDto)
+    $.ajax({
+        url: "api/chat/save-msg/" + roomId,
+        type: "POST",
+        data: JSON.stringify(messageDto),
+        contentType: "application/json",
+        headers: {
+            "Authorization":
+                "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
+        },
+        success: function (data, response) {
+            console.log(response);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
 }
 
 let addBotMessageToDom = async (botMessage) => {
@@ -154,7 +184,7 @@ let sendMessage = async (e) => {
         )});
 
     // add message element to the DOM
-    await addMessageToDom(currentLoggedInUser.name, message);
+    await addMessageToDom(currentLoggedInUser.name, message, uid);
 
     // reset the form
     e.target.reset();
