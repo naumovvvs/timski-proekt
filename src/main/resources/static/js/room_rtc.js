@@ -465,8 +465,8 @@ let endRoom = async (e) => {
         headers: {
             "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
         },
-        success: function (response) {
-            console.log(response);
+        success: function () {
+            sendRoomHasEndedMessage();
         },
         error: function (rs) {
             console.error(rs.status);

@@ -79,7 +79,6 @@ $("#saveRoom").on("click", function(){
         courseId: courseId,
         moderatorId: loggedInUserId
     }
-    // console.log(roomObject);
     $.ajax({
         url: "api/room/add",
         type: "POST",

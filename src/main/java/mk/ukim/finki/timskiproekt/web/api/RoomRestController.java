@@ -9,6 +9,7 @@ import mk.ukim.finki.timskiproekt.model.enums.RoomStatus;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
 import mk.ukim.finki.timskiproekt.service.RoomService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -135,6 +136,7 @@ public class RoomRestController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("ROLE_PROFESSOR")
     @GetMapping("/end/{roomId}")
     public void endSession(@PathVariable Long roomId) {
         this.roomService.endRoom(roomId);

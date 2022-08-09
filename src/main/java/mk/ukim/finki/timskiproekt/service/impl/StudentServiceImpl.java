@@ -3,6 +3,7 @@ package mk.ukim.finki.timskiproekt.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.Student;
+import mk.ukim.finki.timskiproekt.repository.CourseRepository;
 import mk.ukim.finki.timskiproekt.repository.StudentRepository;
 import mk.ukim.finki.timskiproekt.service.StudentService;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ import java.util.List;
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
+    private final CourseRepository courseRepository;
 
-    public StudentServiceImpl(StudentRepository studentRepository) {
+    public StudentServiceImpl(StudentRepository studentRepository, CourseRepository courseRepository) {
         this.studentRepository = studentRepository;
+        this.courseRepository = courseRepository;
     }
 
     @Override
@@ -36,8 +39,11 @@ public class StudentServiceImpl implements StudentService {
     public Student addCourseToStudent(Course course, Long studentId) {
         Student student = this.getStudentById(studentId);
         student.getCourses().add(course);
+        this.studentRepository.save(student);
+        course.getStudents().add(student);
+        this.courseRepository.save(course);
         log.info("Adding course with id: {}, to student with id: {}", course.getId(), studentId);
-        return this.studentRepository.save(student);
+        return student;
     }
 
     @Override
