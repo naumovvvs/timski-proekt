@@ -1,3 +1,6 @@
+// function for waiting x seconds
+const delay = (n) => new Promise( r => setTimeout(r, n*1000));
+
 let handleMemberJoined = async (MemberId) => {
     // add user to participants list
     await addMemberToDom(MemberId);
@@ -102,6 +105,12 @@ let handleChannelMessage = async (messData, memberId) => {
     // if the message is of type 'chat', add it to the DOM
     if(data.type === 'chat') {
         await addMessageToDom(data.displayName, data.message, memberId);
+    } else if (data.type === 'session') {
+        await leaveChannel();
+        await delay(5);
+        window.location.href = "/subject";
+    } else if (data.type === 'bot') {
+        await addBotMessageToDom(data.message);
     }
 }
 
@@ -169,6 +178,30 @@ let addBotMessageToDom = async (botMessage) => {
     if(lastMessage) {
         lastMessage.scrollIntoView();
     }
+}
+
+// send channel message to end session
+let sendRoomHasEndedMessage = async () => {
+    // add bot message to professor's chat
+    await addBotMessageToDom("Session has ended! Redirecting...");
+
+    channel.sendMessage({text:JSON.stringify({
+            'type': 'bot',
+            'message': "Session has ended! Redirecting...",
+            'displayName': currentLoggedInUser.name}
+        )});
+
+    // this function sends message to channel (all users) to end session
+    channel.sendMessage({text:JSON.stringify({
+            'type': 'session',
+            'message': "End session",
+            'displayName': currentLoggedInUser.name}
+    )});
+
+    // the professor logs out after 10 seconds
+    await delay(10);
+    // redirect to previous page
+    window.location.href="/subject";
 }
 
 let sendMessage = async (e) => {

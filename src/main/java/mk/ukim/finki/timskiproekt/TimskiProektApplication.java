@@ -3,7 +3,6 @@ package mk.ukim.finki.timskiproekt;
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.Role;
 import mk.ukim.finki.timskiproekt.model.Room;
-import mk.ukim.finki.timskiproekt.model.Student;
 import mk.ukim.finki.timskiproekt.model.dto.*;
 import mk.ukim.finki.timskiproekt.model.enums.Semester;
 import mk.ukim.finki.timskiproekt.service.CourseService;
@@ -21,7 +20,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootApplication
@@ -58,20 +56,23 @@ public class TimskiProektApplication {
             userService.saveUser(new SaveUserDTO("Admin Adminovski", "admin", "admin123",
                     "admin@test.com", LocalDate.now(),
                     new RoleDTO("ROLE_ADMIN"), List.of(new RoleDTO("ROLE_ADMIN"))));
+
             Course km = courseService.createCourse(new CourseDTO(1L, "Компјутерски Мрежи", "KM001", "https://media.springernature.com/w580h326/nature-cms/uploads/collections/Networks-Collection-img-final-f2c265a59e457f48645e2aa3ff90e942.jpg", Semester.WINTER));
             Course tp = courseService.createCourse(new CourseDTO(1L, "Тимски Проект", "TP001", "https://images-preview.moj-posao.net/article/db/adaa392bd-resize-820x0x100.jpg", Semester.WINTER));
             courseService.createCourse(new CourseDTO(1L, "Бази на податоци", "DB001", "https://miro.medium.com/max/1400/1*mLqtKV1FjUg-WKlLW-cXjQ.jpeg", Semester.WINTER));
             courseService.createCourse(new CourseDTO(1L, "Веб дизајн", "WD001", "https://99designs-blog.imgix.net/blog/wp-content/uploads/2018/09/WHAT-IS-WEB-DESIGN.jpg?auto=format&q=60&w=1860&h=1395&fit=crop&crop=faces", Semester.SUMMER));
-            studentService.addCourseToStudent(km, 3L);
-            studentService.addCourseToStudent(km, 2L);
+
+            //studentService.addCourseToStudent(km, 3L);
+            //studentService.addCourseToStudent(km, 2L);
+
             Room s1 = roomService.create(new SaveRoomDto("Испит - Компјутерски Мрежи", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ));
             Room s2 = roomService.create(new SaveRoomDto("Предавања", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ));
             // test allowed users condition
-            List<Student> allowed = new ArrayList<>();
-            allowed.add((Student) userService.getUser("ognj"));
-            Room test = roomService.create(new SaveRoomDto("Колоквиум (тест)", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ), allowed);
-            courseService.addRoomToCourse(test, "KM001");
+            //List<Student> allowed = new ArrayList<>();
+            //allowed.add((Student) userService.getUser("ognj"));
+            Room test = roomService.create(new SaveRoomDto("Колоквиум (тест)", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ));
 
+            courseService.addRoomToCourse(test, "KM001");
             courseService.addRoomToCourse(s1, "KM001");
             courseService.addRoomToCourse(s2, "KM001");
 //            userService.addRoleToUser("naumovs", "ROLE_STUDENT");
