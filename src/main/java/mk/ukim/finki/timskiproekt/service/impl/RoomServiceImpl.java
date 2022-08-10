@@ -189,11 +189,19 @@ public class RoomServiceImpl implements RoomService {
     public void editStatusForStudent(Long roomId, EditStudentStatusDto studentStatusDto) {
         Room room = this.roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException(String.format("Room with id: %d not found!", roomId)));
-        room.getStudents()
+        Optional<StudentInRoom> optionalStudent = room.getStudents()
                 .stream()
                 .filter(s -> s.getStudent().getId().equals(studentStatusDto.getStudentId()))
-                .findFirst()
-                .ifPresent(ss -> ss.setStatus(StudentStatus.valueOf(studentStatusDto.getNewStudentStatus())));
+                .findFirst();
+        if (optionalStudent.isPresent()) {
+            StudentInRoom student = optionalStudent.get();
+            student.setStatus(StudentStatus.valueOf(studentStatusDto.getNewStudentStatus()));
+            // if the moderator blocked the student, remove it from the list of allowed students for the room
+            if (student.getStatus().equals(StudentStatus.BLOCKED)) {
+                room.getAllowedStudents().remove(student.getStudent());
+            }
+            this.studentInRoomRepository.save(student);
+        }
         log.info("Changing student status to: {}, by id {}, in room with id: {}",
                 studentStatusDto.getNewStudentStatus(), studentStatusDto.getStudentId(), roomId);
         this.roomRepository.save(room);
@@ -249,10 +257,9 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public boolean checkIfStudentIsAllowed(Long roomId, Long studentId) {
+    public boolean checkIfStudentIsAllowed(Room room, Long studentId) {
         Optional<AppUser> optionalStudent = this.studentRepository.findById(studentId);
         if (optionalStudent.isPresent()) {
-            Room room = this.getRoomById(roomId);
             return room.getAllowedStudents().stream()
                     .anyMatch(s -> s.getId().equals(studentId));
         }

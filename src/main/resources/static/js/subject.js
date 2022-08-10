@@ -10,6 +10,11 @@ if(localStorage.getItem("accessToken") === null){
     $("#loggedUserName").removeClass("d-none");
 }
 
+$("#logout").on("click", function(){
+    window.localStorage.clear();
+    window.location.reload();
+});
+
 let loggedInUserId;
 let courseId;
 let isModerator = false;
@@ -26,12 +31,17 @@ $.ajax({
         if(response.roles[0].name == "ROLE_PROFESSOR"){
             isModerator = true;
         }
+        $("#loggedUserName").append(response.username);
     },
     error: function (rs) {
         console.error(rs.status);
         console.error(rs.responseText);
     }
 });
+
+if(!isModerator) {
+    $("#createRoom").css("display", "none");
+}
 
 let currentSubject = localStorage.getItem("courseTitle");
 $(".course-title").text(currentSubject);
