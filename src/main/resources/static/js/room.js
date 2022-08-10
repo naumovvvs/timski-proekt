@@ -77,3 +77,24 @@ let hideDisplayFrame = () => {
 }
 
 displayFrame.addEventListener('click', hideDisplayFrame);
+
+// hide end-session button for users with non-moderator role
+$(document).ready(function() {
+  $.ajax({
+    url: "/api/user/current",
+    type: "GET",
+    async: false,
+    headers: {
+      "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+    },
+    success: function (response) {
+      if(!(response.roles[0].name === "ROLE_PROFESSOR")){
+        $("#end__room__btn").css("display", "none");
+      }
+    },
+    error: function (rs) {
+      console.error(rs.status);
+      console.error(rs.responseText);
+    }
+  });
+});

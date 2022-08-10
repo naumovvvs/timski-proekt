@@ -485,6 +485,7 @@ let changeStudentStatus = async (e) => {
         newStudentStatus: newStatus
     };
 
+    let isBlocked = false;
     let newStatusClass;
     if (newStatus === "IDENTIFIED") {
         newStatusClass = "green__icon"
@@ -492,6 +493,7 @@ let changeStudentStatus = async (e) => {
         newStatusClass = "orange__icon";
     } else {
         newStatusClass = "red__icon";
+        isBlocked = true;
     }
 
     // console.log(dtoData)
@@ -519,6 +521,10 @@ let changeStudentStatus = async (e) => {
         }
     });
 
+    if (isBlocked) {
+        alert("You have been blocked from the moderator! Close this to redirect.")
+        window.location.href="/subject";
+    }
 }
 
 document.getElementById('mic-btn').addEventListener('click', toggleMic);

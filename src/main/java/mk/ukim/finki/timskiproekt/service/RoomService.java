@@ -55,5 +55,5 @@ public interface RoomService {
 
     void changeRoomStatus(Long id, RoomStatus newStatus);
 
-    boolean checkIfStudentIsAllowed(Long roomId, Long studentId);
+    boolean checkIfStudentIsAllowed(Room room, Long studentId);
 }

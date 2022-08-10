@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -46,7 +48,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .deleteCookies("JSESSIONID");
 
         http.authorizeRequests().antMatchers("/login/**", "/api/token/refresh/**",
-                "/css/**", "/js/**", "/img/**", "/home", "/api/course/all-courses", "/subject", "/", "/room").permitAll();
+                "/css/**", "/js/**", "/img/**", "/home", "/api/course/all-courses", "/subject", "/", "/room",
+                "/access-denied", "/not-found").permitAll();
         //http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
         //http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/test/**").authenticated();
         http.authorizeRequests().anyRequest().authenticated();
