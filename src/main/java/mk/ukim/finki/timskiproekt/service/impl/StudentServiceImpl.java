@@ -1,5 +1,6 @@
 package mk.ukim.finki.timskiproekt.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.Student;
@@ -12,15 +13,11 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
-
-    public StudentServiceImpl(StudentRepository studentRepository, CourseRepository courseRepository) {
-        this.studentRepository = studentRepository;
-        this.courseRepository = courseRepository;
-    }
 
     @Override
     public Student getStudentById(Long id) {

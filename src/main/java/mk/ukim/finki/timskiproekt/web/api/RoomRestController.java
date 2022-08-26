@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import mk.ukim.finki.timskiproekt.model.*;
 import mk.ukim.finki.timskiproekt.model.dto.EditRoomDto;
 import mk.ukim.finki.timskiproekt.model.dto.EditStudentStatusDto;
+import mk.ukim.finki.timskiproekt.model.dto.InterruptionDTO;
 import mk.ukim.finki.timskiproekt.model.dto.SaveRoomDto;
 import mk.ukim.finki.timskiproekt.model.enums.RoomStatus;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
@@ -152,5 +153,11 @@ public class RoomRestController {
         return Optional.of(this.roomService.getModeratorByRoom(id))
                 .map(professor -> ResponseEntity.ok().body(professor))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/student/connection-interruption")
+    public void registerInterruption(@RequestBody InterruptionDTO interruptionDTO) {
+        this.roomService.addInterruptionToSession(interruptionDTO.getTime(), interruptionDTO.getTotalDuration(),
+                interruptionDTO.getRoomId(), interruptionDTO.getStudentId());
     }
 }

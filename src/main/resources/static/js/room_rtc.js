@@ -24,6 +24,12 @@ let client;
 let rtmClient;
 // rtm channel
 let channel;
+// interruption start time
+let interruptionStartTime;
+// interruption end time
+let interruptionEndTime;
+// interruption start time full format
+let interruptionStartTimeString;
 
 let checkIfStudent = async () => {
     $.ajax({
@@ -138,6 +144,53 @@ let joinRoomInit = async () => {
     // create RTM channel
     channel = await rtmClient.createChannel(roomId);
     await channel.join();
+
+    // monitors the connection state
+    rtmClient.on('ConnectionStateChanged', (newState, reason) => {
+        console.log('USER STATE CHANGE - ' + uid);
+        console.log('newState - ' + newState + " ||| reason - " + reason);
+
+        if(newState==='RECONNECTING' && reason==='INTERRUPTED') {
+            // record the time when the interruption started
+            interruptionStartTime = Date.now();
+            let dateObj = new Date();
+            interruptionStartTimeString = dateObj.toLocaleString();
+        } else if (newState==='CONNECTED' && interruptionStartTime!=null) {
+            // record when the interruption ended, calculate duration and save in database
+            interruptionEndTime = Date.now();
+            // total duration in seconds (1000ms=1s)
+            let totalDuration = (interruptionEndTime-interruptionStartTime)/1000;
+
+            // DTO object for creating interruption
+            const interruptionDTO = {
+                time: interruptionStartTimeString,
+                totalDuration: totalDuration,
+                roomId: roomId,
+                studentId: uid
+            };
+
+            // reset start time
+            interruptionStartTime = null;
+
+            // save interruption in database
+            $.ajax({
+                url: "/api/room/student/connection-interruption",
+                type: "POST",
+                data: JSON.stringify(interruptionDTO),
+                contentType: "application/json",
+                headers: {
+                    "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+                },
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (rs) {
+                    console.error(rs.status);
+                    console.error(rs.responseText);
+                }
+            });
+        }
+    });
 
     // event listeners for AgoraRTM
     channel.on('MemberJoined', handleMemberJoined);
@@ -330,7 +383,13 @@ let handleUserLeft = async (user) => {
 }
 
 let toggleMic = async (e) => {
-    let button = e.currentTarget;
+    let button;
+
+    if(e===undefined || e===null) {
+        button = document.getElementById("mic-btn");
+    } else {
+        button = e.currentTarget;
+    }
 
     // check if this is the first time turning on the microphone
     // if yes, create audio stream
@@ -528,6 +587,7 @@ let changeStudentStatus = async (e) => {
 }
 
 document.getElementById('mic-btn').addEventListener('click', toggleMic);
+document.getElementById('admin-mic-btn').addEventListener('click', sendToggleAllMicrophonesMessage)
 document.getElementById('camera-btn').addEventListener('click', toggleCamera);
 document.getElementById('screen-btn').addEventListener('click', toggleScreen);
 document.getElementById('end__room__btn').addEventListener('click', endRoom);

@@ -90,6 +90,7 @@ $(document).ready(function() {
     success: function (response) {
       if(!(response.roles[0].name === "ROLE_PROFESSOR")){
         $("#end__room__btn").css("display", "none");
+        $("#admin-mic-btn").css("display", "none");
       }
     },
     error: function (rs) {

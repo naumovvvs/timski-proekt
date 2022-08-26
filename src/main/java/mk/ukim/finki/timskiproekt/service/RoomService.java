@@ -56,4 +56,6 @@ public interface RoomService {
     void changeRoomStatus(Long id, RoomStatus newStatus);
 
     boolean checkIfStudentIsAllowed(Room room, Long studentId);
+
+    void addInterruptionToSession(String time, int totalDuration, Long roomId, Long studentId);
 }

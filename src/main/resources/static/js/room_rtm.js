@@ -111,6 +111,8 @@ let handleChannelMessage = async (messData, memberId) => {
         window.location.href = "/subject";
     } else if (data.type === 'bot') {
         await addBotMessageToDom(data.message);
+    } else if (data.type === 'microphoneToggle') {
+        await toggleMic();
     }
 }
 
@@ -202,6 +204,13 @@ let sendRoomHasEndedMessage = async () => {
     await delay(10);
     // redirect to previous page
     window.location.href="/subject";
+}
+
+let sendToggleAllMicrophonesMessage = async (e) => {
+    channel.sendMessage({text:JSON.stringify({
+            'type': 'microphoneToggle',
+            'message': "Toggle all microphones..."
+        })});
 }
 
 let sendMessage = async (e) => {

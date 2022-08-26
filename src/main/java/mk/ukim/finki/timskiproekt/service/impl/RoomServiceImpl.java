@@ -13,6 +13,7 @@ import mk.ukim.finki.timskiproekt.service.RoomService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ public class RoomServiceImpl implements RoomService {
     private final ChatRepository chatRepository;
     private final StudentRepository studentRepository;
     private final StudentInRoomRepository studentInRoomRepository;
+    private final InterruptionRepository interruptionRepository;
 
     @Override
     public Room getRoomById(Long id) {
@@ -264,5 +266,32 @@ public class RoomServiceImpl implements RoomService {
                     .anyMatch(s -> s.getId().equals(studentId));
         }
         return false;
+    }
+
+    @Override
+    public void addInterruptionToSession(String time, int totalDuration, Long roomId, Long studentId) {
+        // Add 0 for single digit months to avoid parsing errors
+        String firstPart = time.split("/")[0];
+        if(firstPart.length()==1) {
+            time = "0"+time;
+        }
+
+        String dateTimePattern = "MM/dd/yyyy, hh:mm:ss a";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateTimePattern);
+
+        LocalDateTime dateTime = LocalDateTime.parse(time, formatter);
+
+        Room room = this.roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException(String.format("Room with id: %d not found!", roomId)));
+        Optional<AppUser> appUser = this.studentRepository.findById(studentId);
+
+        if(appUser.isPresent()) {
+            StudentInRoom studentInRoom = this.studentInRoomRepository
+                    .findStudentInRoomByRoomAndStudent(room, (Student) appUser.get());
+
+            Interruption interruption = this.interruptionRepository.save(new Interruption(dateTime, totalDuration));
+            studentInRoom.addNewInterruption(interruption);
+            this.studentInRoomRepository.save(studentInRoom);
+        }
     }
 }

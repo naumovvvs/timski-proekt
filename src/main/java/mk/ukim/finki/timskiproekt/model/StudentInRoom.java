@@ -7,6 +7,8 @@ import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -31,10 +33,18 @@ public class StudentInRoom {
 
     private LocalDateTime leaveTime;
 
+    @OneToMany
+    private List<Interruption> interruptions;
+
     public StudentInRoom(Room room, Student student) {
         this.room = room;
         this.student = student;
         this.status = StudentStatus.UNIDENTIFIED;
         this.enterTime = LocalDateTime.now();
+        this.interruptions = new ArrayList<>();
+    }
+
+    public void addNewInterruption(Interruption interruption) {
+        this.interruptions.add(interruption);
     }
 }
