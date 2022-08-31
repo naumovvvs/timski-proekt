@@ -119,7 +119,7 @@ public class RoomServiceImpl implements RoomService {
         return room;
     }
 
-    // TODO: only for testing purposes (delete later)
+    // TODO: only for testing purposes (delete later) (maybe useful because of allowed students?)
 //    @Override
 //    public Room create(SaveRoomDto roomDto, List<Student> allowed) {
 //        Course course = this.courseRepository.findById(roomDto.getCourseId())
@@ -270,13 +270,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void addInterruptionToSession(String time, int totalDuration, Long roomId, Long studentId) {
-        // Add 0 for single digit months to avoid parsing errors
-        String firstPart = time.split("/")[0];
-        if(firstPart.length()==1) {
-            time = "0"+time;
-        }
-
-        String dateTimePattern = "MM/dd/yyyy, hh:mm:ss a";
+        String dateTimePattern = "M/d/yyyy, h:m:s a";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateTimePattern);
 
         LocalDateTime dateTime = LocalDateTime.parse(time, formatter);

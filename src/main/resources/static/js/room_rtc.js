@@ -3,9 +3,9 @@ const APP_ID = "4b77f4fc58994fdd9fe727a7106ad66a";
 // user id
 let uid = sessionStorage.getItem("uid");
 // contains current logged-in user
-let currentLoggedInUser;
+let currentLoggedInUser= null;
 // contains current logged-in user
-let currentLoggedInStudent;
+let currentLoggedInStudent = null;
 // audio and video streams (ours/local)
 let localTracks = [];
 // key-value pairs
@@ -146,20 +146,43 @@ let joinRoomInit = async () => {
     await channel.join();
 
     // monitors the connection state
-    rtmClient.on('ConnectionStateChanged', (newState, reason) => {
+    rtmClient.on('ConnectionStateChanged', async (newState, reason) => {
         console.log('USER STATE CHANGE - ' + uid);
         console.log('newState - ' + newState + " ||| reason - " + reason);
 
-        if(newState==='RECONNECTING' && reason==='INTERRUPTED') {
+        if (newState === 'RECONNECTING' && reason === 'INTERRUPTED') {
             // record the time when the interruption started
             interruptionStartTime = Date.now();
             let dateObj = new Date();
             interruptionStartTimeString = dateObj.toLocaleString();
-        } else if (newState==='CONNECTED' && interruptionStartTime!=null) {
+        } else if (newState === 'CONNECTED' && interruptionStartTime != null) {
+            // check if professor
+            if(currentLoggedInStudent==="") {
+                interruptionStartTime = null;
+                return;
+            }
+
             // record when the interruption ended, calculate duration and save in database
             interruptionEndTime = Date.now();
+
+            // wait 5 seconds before sending message (gives time to the app to connect to Agora RTM server)
+            await delay(5);
+
             // total duration in seconds (1000ms=1s)
-            let totalDuration = (interruptionEndTime-interruptionStartTime)/1000;
+            let totalDuration = (interruptionEndTime - interruptionStartTime) / 1000;
+
+            await changeUserStatus("orange__icon", currentLoggedInUser.id);
+
+            // send bot message
+            channel.sendMessage({
+                text: JSON.stringify({
+                    'type': 'bot',
+                    'message': currentLoggedInUser.name + " had been disconnected for " + totalDuration + " seconds!"
+                })
+            });
+
+            // change student status (color)
+            await changeStudentStatusAfterInterruption();
 
             // DTO object for creating interruption
             const interruptionDTO = {
@@ -180,13 +203,6 @@ let joinRoomInit = async () => {
                 contentType: "application/json",
                 headers: {
                     "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
-                },
-                success: function (response) {
-                    console.log(response);
-                },
-                error: function (rs) {
-                    console.error(rs.status);
-                    console.error(rs.responseText);
                 }
             });
         }
@@ -534,6 +550,38 @@ let endRoom = async (e) => {
     });
 }
 
+let changeStudentStatusAfterInterruption = async () => {
+    let dtoData = {
+        studentId: currentLoggedInUser.id,
+        newStudentStatus: "SUSPICIOUS"
+    };
+
+    $.ajax({
+        url: "/api/room/edit-student-status/" + roomId,
+        type: "POST",
+        data: JSON.stringify(dtoData),
+        contentType: "application/json",
+        headers: {
+            "Authorization":
+                "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
+        },
+        success: function (data, response) {
+            console.log(response);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
+
+    // send channel message to all users for status change on current user
+    channel.sendMessage({text:JSON.stringify({
+            'type': 'status_change',
+            'new_status': 'orange__icon',
+            'user': uid
+    })});
+}
+
 let changeStudentStatus = async (e) => {
     let newStatus = e.target.id;
     let id = e.target.parentElement.parentElement.parentElement.id;
@@ -578,7 +626,6 @@ let changeStudentStatus = async (e) => {
             document.getElementById("user-container-" + userID).style.borderColor = newBorderClass;
             span.removeAttribute("class");
             span.classList.add(newStatusClass);
-            // console.log(span);
         },
         error: function (rs) {
             console.error(rs.status);

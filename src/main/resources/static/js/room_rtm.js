@@ -11,10 +11,13 @@ let handleMemberJoined = async (MemberId) => {
     // update the participants list
     await updateMemberTotal(members);
 
-    // get user's name by key MemberId from storage
-    let {name} = await rtmClient.getUserAttributesByKeys(MemberId, ['name']);
-    // add bot message for welcoming user
-    await addBotMessageToDom(`Welcome to the room ${name}! 👋`);
+    // add welcome message to DOM only if user is of type 'professor'
+    if(currentLoggedInStudent==="") {
+        // get user's name by key MemberId from storage
+        let {name} = await rtmClient.getUserAttributesByKeys(MemberId, ['name']);
+        // add bot message for welcoming user
+        await addBotMessageToDom(`Welcome to the room ${name}! 👋`);
+    }
 }
 
 let addMemberToDom = async (MemberId) => {
@@ -81,8 +84,11 @@ let removeMemberFromDom = async (MemberId) => {
 
     // remove the participant from participants list
     memberWrapper.remove();
-    // add bot message
-    await addBotMessageToDom(`${name} has left the room.`);
+
+    // add bot message if the user is professor
+    if(currentLoggedInStudent==="") {
+        await addBotMessageToDom(`${name} has left the room.`);
+    }
 }
 
 let getMembers = async () => {
@@ -109,11 +115,31 @@ let handleChannelMessage = async (messData, memberId) => {
         await leaveChannel();
         await delay(5);
         window.location.href = "/subject";
-    } else if (data.type === 'bot') {
+    } else if (data.type === 'bot' && currentLoggedInStudent==="") {
         await addBotMessageToDom(data.message);
     } else if (data.type === 'microphoneToggle') {
         await toggleMic();
+    } else if (data.type === 'status_change') {
+        await changeUserStatus(data.new_status, data.user);
+    } else if (data.type === 'session_end') {
+        await addBotMessageToDom(data.message);
     }
+}
+
+let changeUserStatus = async (newStatus, userId) => {
+    console.log("CHANGE USER STATUS (COLOR)")
+
+    // change status in participants
+    let obj = $("#member__"+userId+"__wrapper");
+
+    let previousStatus = obj[0].firstElementChild.className;
+    // remove previous status
+    obj[0].firstElementChild.classList.remove(previousStatus);
+    // add new status
+    obj[0].firstElementChild.classList.add(newStatus);
+
+    // TODO - change status in video streams container
+    document.getElementById("user-container-" + userId).style.borderColor = "orange";
 }
 
 let addMessageToDom = async (name, message, sender) => {
@@ -188,17 +214,15 @@ let sendRoomHasEndedMessage = async () => {
     await addBotMessageToDom("Session has ended! Redirecting...");
 
     channel.sendMessage({text:JSON.stringify({
-            'type': 'bot',
-            'message': "Session has ended! Redirecting...",
-            'displayName': currentLoggedInUser.name}
-        )});
+            'type': 'session_end',
+            'message': "Session has ended! Redirecting..."
+    })});
 
     // this function sends message to channel (all users) to end session
     channel.sendMessage({text:JSON.stringify({
             'type': 'session',
-            'message': "End session",
-            'displayName': currentLoggedInUser.name}
-    )});
+            'message': "End session"
+    })});
 
     // the professor logs out after 10 seconds
     await delay(10);
