@@ -3,6 +3,7 @@ package mk.ukim.finki.timskiproekt.service;
 import mk.ukim.finki.timskiproekt.model.*;
 import mk.ukim.finki.timskiproekt.model.dto.EditRoomDto;
 import mk.ukim.finki.timskiproekt.model.dto.EditStudentStatusDto;
+import mk.ukim.finki.timskiproekt.model.dto.RoomSummaryDTO;
 import mk.ukim.finki.timskiproekt.model.dto.SaveRoomDto;
 import mk.ukim.finki.timskiproekt.model.enums.RoomStatus;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
@@ -58,4 +59,6 @@ public interface RoomService {
     boolean checkIfStudentIsAllowed(Room room, Long studentId);
 
     void addInterruptionToSession(String time, int totalDuration, Long roomId, Long studentId);
+
+    RoomSummaryDTO getRoomSummary(Long roomId, Long studentId);
 }

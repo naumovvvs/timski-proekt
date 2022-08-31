@@ -113,7 +113,8 @@ let handleChannelMessage = async (messData, memberId) => {
         await addMessageToDom(data.displayName, data.message, memberId);
     } else if (data.type === 'session') {
         await leaveChannel();
-        await delay(5);
+        await getRoomInfo(currentLoggedInUser.id, roomId);
+        await delay(10);
         window.location.href = "/subject";
     } else if (data.type === 'bot' && currentLoggedInStudent==="") {
         await addBotMessageToDom(data.message);
@@ -123,6 +124,41 @@ let handleChannelMessage = async (messData, memberId) => {
         await changeUserStatus(data.new_status, data.user);
     } else if (data.type === 'session_end') {
         await addBotMessageToDom(data.message);
+    }
+}
+
+let getRoomInfo = async (userId, roomId) => {
+    let url = "/api/room/end/"+roomId+"/room-summary/"+userId;
+    let room = null;
+
+    $.ajax({
+        type: "GET",
+        url: url,
+        async: false,
+        headers: {
+            "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+        },
+        success: function (response) {
+            room = response;
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
+
+    if(room!=null) {
+        alert("Room has ended! Press ok to redirect...\n\n"
+            + "Room summary:\n"
+            + "Name: " + room.name + "\n"
+            + "Duration: " + room.roomDuration + " minutes\n"
+            + "\n"
+            + "Student summary:\n"
+            + "Student: " + room.studentFullName + "\n"
+            + "Total interruptions: " + room.totalInterruptions + "\n"
+            + "Interruptions duration: " + room.interruptionsDuration + " seconds\n"
+            + "Student status: " + room.studentStatus);
+
     }
 }
 
@@ -138,8 +174,11 @@ let changeUserStatus = async (newStatus, userId) => {
     // add new status
     obj[0].firstElementChild.classList.add(newStatus);
 
-    // TODO - change status in video streams container
-    document.getElementById("user-container-" + userId).style.borderColor = "orange";
+    // change status in video container
+    let videoContainer = document.getElementById("user-container-" + userId);
+    if(videoContainer!==null) {
+        videoContainer.style.borderColor = "orange";
+    }
 }
 
 let addMessageToDom = async (name, message, sender) => {
