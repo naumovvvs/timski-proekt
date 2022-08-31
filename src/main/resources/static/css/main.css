@@ -64,10 +64,11 @@ a {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #000000;
-  background-color: #1a1a1a;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.51), #0049af);
   text-decoration: none;
   padding: 16px 5%;
   z-index: 999;
+  box-shadow: 5px 10px 18px #000000;
 }
 
 #logo {

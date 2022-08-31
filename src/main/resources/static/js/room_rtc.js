@@ -538,7 +538,6 @@ let changeStudentStatus = async (e) => {
     let newStatus = e.target.id;
     let id = e.target.parentElement.parentElement.parentElement.id;
     let studentId = id.split("__")[1];
-
     let dtoData = {
         studentId: studentId,
         newStudentStatus: newStatus
@@ -546,12 +545,16 @@ let changeStudentStatus = async (e) => {
 
     let isBlocked = false;
     let newStatusClass;
+    let newBorderClass;
     if (newStatus === "IDENTIFIED") {
         newStatusClass = "green__icon"
+        newBorderClass = "#2aca3e"
     } else if (newStatus === "SUSPICIOUS") {
         newStatusClass = "orange__icon";
+        newBorderClass = "#FFA500"
     } else {
         newStatusClass = "red__icon";
+        newBorderClass = "#ff0000";
         isBlocked = true;
     }
 
@@ -568,8 +571,11 @@ let changeStudentStatus = async (e) => {
                 "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
         },
         success: function (data, response) {
-            console.log(response);
+            console.log(data);
             let span = e.target.parentElement.parentElement.previousElementSibling.previousElementSibling;
+            let userID = e.target.parentElement.parentElement.parentElement.getAttribute('id').match((/(\d+)/))[0];
+            console.log(userID);
+            document.getElementById("user-container-" + userID).style.borderColor = newBorderClass;
             span.removeAttribute("class");
             span.classList.add(newStatusClass);
             // console.log(span);
