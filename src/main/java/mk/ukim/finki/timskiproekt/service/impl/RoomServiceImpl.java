@@ -160,14 +160,21 @@ public class RoomServiceImpl implements RoomService {
         //  if (room.getAllowedStudents().stream().anyMatch(student -> student.getId().equals(studentId))) {
         Optional<AppUser> appUser = this.studentRepository.findById(studentId);
         if (appUser.isPresent()) {
-            StudentInRoom studentInRoom = new StudentInRoom(room, (Student) appUser.get());
-                /*
-                    TODO:
-                     Test if the newly created object (studentInRoom) is saved in its own table,
-                     when saving it in the container (room).
+            // Check if there is previous record for the same student and room without leave time
+            // If so, update the record and set the leave time as current time
+            Optional<StudentInRoom> previousOpt = this.studentInRoomRepository
+                    .findAllByRoomAndStudent(room, (Student) appUser.get())
+                    .stream().filter(x->x.getLeaveTime()==null).findFirst();
 
-                     Update: must be saved in it's own table first.
-                */
+            // check if there is previous record without recorded leave time
+            if(previousOpt.isPresent()) {
+                StudentInRoom previousRecord = previousOpt.get();
+                previousRecord.setLeaveTime(LocalDateTime.now());
+                this.studentInRoomRepository.save(previousRecord);
+            }
+
+            StudentInRoom studentInRoom = new StudentInRoom(room, (Student) appUser.get());
+            // save the object first in it's own table
             this.studentInRoomRepository.save(studentInRoom);
 
             room.getStudents().add(studentInRoom);
@@ -196,7 +203,8 @@ public class RoomServiceImpl implements RoomService {
         Optional<StudentInRoom> optionalStudent = room.getStudents()
                 .stream()
                 .filter(s -> s.getStudent().getId().equals(studentStatusDto.getStudentId()))
-                .findFirst();
+                .max(Comparator.comparing(StudentInRoom::getEnterTime));
+
         if (optionalStudent.isPresent()) {
             StudentInRoom student = optionalStudent.get();
             student.setStatus(StudentStatus.valueOf(studentStatusDto.getNewStudentStatus()));
@@ -217,9 +225,18 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(() -> new RuntimeException(String.format("Room with id: %d not found!", roomId)));
         Optional<AppUser> appUser = this.studentRepository.findById(studentId);
         if(appUser.isPresent()) {
-            if (appUser.get().getRoles().stream().allMatch(role -> role.getName().equals("ROLE_STUDENT"))) {
-                StudentInRoom studentInRoom = this.studentInRoomRepository
-                        .findStudentInRoomByRoomAndStudent(room, (Student) appUser.get());
+            if (appUser.get().getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_STUDENT"))) {
+                Optional<StudentInRoom> optStudentInRoom = this.studentInRoomRepository
+                        .findAllByRoomAndStudent(room, (Student) appUser.get())
+                        .stream()
+                        .filter(x->x.getLeaveTime()==null)
+                        .findFirst();
+
+                if(!optStudentInRoom.isPresent()) {
+                    throw new RuntimeException("Cannot find student in room object!");
+                }
+
+                StudentInRoom studentInRoom = optStudentInRoom.get();
                 studentInRoom.setLeaveTime(LocalDateTime.now());
                 this.studentInRoomRepository.save(studentInRoom);
             }
@@ -284,7 +301,11 @@ public class RoomServiceImpl implements RoomService {
 
         if(appUser.isPresent()) {
             StudentInRoom studentInRoom = this.studentInRoomRepository
-                    .findStudentInRoomByRoomAndStudent(room, (Student) appUser.get());
+                    .findAllByRoomAndStudent(room, (Student) appUser.get())
+                    .stream()
+                    .filter(x->x.getLeaveTime()==null)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Cannot find student in room!"));
 
             Interruption interruption = this.interruptionRepository.save(new Interruption(dateTime, totalDuration));
             studentInRoom.addNewInterruption(interruption);
@@ -299,11 +320,11 @@ public class RoomServiceImpl implements RoomService {
         Optional<AppUser> appUser = this.studentRepository.findById(studentId);
 
         if(appUser.isPresent()) {
-            StudentInRoom studentInRoom = this.studentInRoomRepository
-                    .findStudentInRoomByRoomAndStudent(room, (Student) appUser.get());
+            List<StudentInRoom> studentInRoomList = this.studentInRoomRepository
+                    .findAllByRoomAndStudent(room, (Student) appUser.get());
 
-            Iterable<Long> interruptionsIds = studentInRoom.getInterruptions()
-                    .stream()
+            Iterable<Long> interruptionsIds = studentInRoomList.stream()
+                    .flatMap(x->x.getInterruptions().stream())
                     .map(Interruption::getId)
                     .collect(Collectors.toList());
 
@@ -314,9 +335,14 @@ public class RoomServiceImpl implements RoomService {
                     .mapToInt(Interruption::getTotalDurationSeconds)
                     .sum();
 
+            Student student = (Student) appUser.get();
             Duration timeElapsed = Duration.between(room.getStartTime(), room.getEndTime());
-            String studentFullName = studentInRoom.getStudent().getName()
-                    + " (" + studentInRoom.getStudent().getIndex() + ")";
+            String studentFullName = student.getName()
+                    + " (" + student.getIndex() + ")";
+
+            StudentInRoom studentInRoom = studentInRoomList.stream()
+                    .max(Comparator.comparing(StudentInRoom::getLeaveTime))
+                    .orElseThrow(() -> new RuntimeException("Cannot find student in room!"));
 
             return new RoomSummaryDTO(room.getName(), timeElapsed.toMinutes(), studentFullName,
                     totalInterruptions, interruptionsDuration, studentInRoom.getStatus().name());
