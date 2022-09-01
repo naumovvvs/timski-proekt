@@ -200,31 +200,6 @@ let addMessageToDom = async (name, message, sender) => {
     if(lastMessage) {
         lastMessage.scrollIntoView();
     }
-
-    // send message to backend
-    let messageDto = {
-        content: message,
-        senderId: sender
-    }
-
-    console.log(messageDto)
-    $.ajax({
-        url: "api/chat/save-msg/" + roomId,
-        type: "POST",
-        data: JSON.stringify(messageDto),
-        contentType: "application/json",
-        headers: {
-            "Authorization":
-                "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
-        },
-        success: function (data, response) {
-            console.log(response);
-        },
-        error: function (rs) {
-            console.error(rs.status);
-            console.error(rs.responseText);
-        }
-    });
 }
 
 let addBotMessageToDom = async (botMessage) => {
@@ -290,6 +265,30 @@ let sendMessage = async (e) => {
 
     // add message element to the DOM
     await addMessageToDom(currentLoggedInUser.name, message, uid);
+
+    // send message to backend
+    let messageDto = {
+        content: message,
+        senderId: uid
+    }
+
+    $.ajax({
+        url: "api/chat/save-msg/" + roomId,
+        type: "POST",
+        data: JSON.stringify(messageDto),
+        contentType: "application/json",
+        headers: {
+            "Authorization":
+                "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
+        },
+        success: function (data, response) {
+            console.log(response);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
 
     // reset the form
     e.target.reset();
