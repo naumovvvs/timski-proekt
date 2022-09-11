@@ -13,4 +13,6 @@ public interface StudentService {
     Student addCourseToStudent(Course course, Long studentId);
 
     List<Course> getAllCoursesByStudent(Long id);
+
+    List<Student> getAllStudents();
 }

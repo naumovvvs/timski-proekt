@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.Professor;
+import mk.ukim.finki.timskiproekt.repository.CourseRepository;
 import mk.ukim.finki.timskiproekt.repository.ProfessorRepository;
 import mk.ukim.finki.timskiproekt.service.ProfessorService;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.List;
 public class ProfessorServiceImpl implements ProfessorService {
 
     private final ProfessorRepository professorRepository;
+    private final CourseRepository courseRepository;
 
     @Override
     public Professor getProfessor(Long id) {
@@ -31,14 +33,16 @@ public class ProfessorServiceImpl implements ProfessorService {
     }
 
     @Override
-    public Professor addCourseToProfessor(Course course, Long professorId) {
+    public Professor addCourseToProfessor(String courseCode, Long professorId) {
         Professor prof = (Professor) this.professorRepository.findById(professorId)
                 .orElseThrow(() -> new RuntimeException(String.format("Professor with id: %d not found!", professorId)));
+        Course course = this.courseRepository.findByCode(courseCode);
 
         List<Course> profCourses = prof.getCourses();
         profCourses.add(course);
         prof.setCourses(profCourses);
 
+        log.info("Assigning course with code: {}, to professor with id: {}", courseCode, professorId);
         return this.professorRepository.save(prof);
     }
 }

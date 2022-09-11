@@ -20,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootApplication
@@ -65,12 +66,12 @@ public class TimskiProektApplication {
             //studentService.addCourseToStudent(km, 3L);
             //studentService.addCourseToStudent(km, 2L);
 
-            Room s1 = roomService.create(new SaveRoomDto("Испит - Компјутерски Мрежи", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ));
-            Room s2 = roomService.create(new SaveRoomDto("Предавања", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ));
+            Room s1 = roomService.create(new SaveRoomDto("Испит - Компјутерски Мрежи", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L, new ArrayList<>()));
+            Room s2 = roomService.create(new SaveRoomDto("Предавања", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L, new ArrayList<>()));
             // test allowed users condition
             //List<Student> allowed = new ArrayList<>();
             //allowed.add((Student) userService.getUser("ognj"));
-            Room test = roomService.create(new SaveRoomDto("Колоквиум (тест)", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L ));
+            Room test = roomService.create(new SaveRoomDto("Колоквиум (тест)", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L, new ArrayList<>()));
 
             courseService.addRoomToCourse(test, "KM001");
             courseService.addRoomToCourse(s1, "KM001");

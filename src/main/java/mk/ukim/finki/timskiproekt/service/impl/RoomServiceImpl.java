@@ -106,10 +106,13 @@ public class RoomServiceImpl implements RoomService {
         Chat chat = new Chat();
         this.chatRepository.save(chat);
 
-        List<Student> studentsList = new ArrayList<>();
-        course.getStudents().forEach(x -> studentsList.add((Student) studentRepository.findByUsername(x.getUsername())));
+        List<Student> allowedStudents = new ArrayList<>();
+        for (String index : roomDto.getAllowedStudents()) {
+            Student student = this.studentRepository.getByIndex(Long.parseLong(index));
+            allowedStudents.add(student);
+        }
 
-        Room room = new Room(roomDto.getName(), roomDto.getOpenFrom(), roomDto.getOpenTo(), course, moderator, chat, studentsList);
+        Room room = new Room(roomDto.getName(), roomDto.getOpenFrom(), roomDto.getOpenTo(), course, moderator, chat, allowedStudents);
         this.roomRepository.save(room);
 
         course.getRooms().add(room);
