@@ -652,6 +652,10 @@ document.getElementById('screen-btn').addEventListener('click', toggleScreen);
 document.getElementById('end__room__btn').addEventListener('click', endRoom);
 $(".student_status").on('click', changeStudentStatus);
 
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+});
+
 joinRoomInit();
 
 
