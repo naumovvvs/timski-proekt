@@ -332,7 +332,7 @@ let joinVideoStream = async () => {
                   </div>`;
 
     // add video player for current user to the DOM
-    document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
+    document.getElementById('unidentified__container').insertAdjacentHTML('beforeend', player);
     // event listener for when user clicks, expand the video to presenter mode (full screen)
     document.getElementById(`user-container-${uid}`).addEventListener('click', expandVideoFrame);
 
@@ -378,7 +378,7 @@ let handleUserPublished = async (user, mediaType) => {
                   </div>`;
 
         // add player to the DOM
-        document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
+        document.getElementById('unidentified__container').insertAdjacentHTML('beforeend', player);
         document.getElementById(`user-container-${user.uid}`).addEventListener('click', expandVideoFrame);
     }
 
@@ -729,7 +729,13 @@ let changeStudentStatus = async (e) => {
             let span = e.target.parentElement.parentElement.previousElementSibling.previousElementSibling;
             let userID = e.target.parentElement.parentElement.parentElement.getAttribute('id').match((/(\d+)/))[0];
             console.log(userID);
-            document.getElementById("user-container-" + userID).style.borderColor = newBorderClass;
+            let userContainer = document.getElementById("user-container-" + userID);
+            userContainer.style.borderColor = newBorderClass;
+            // change user-container position based on the new status
+            let parentElem = userContainer.parentElement;
+            parentElem.removeChild(userContainer);
+            let newContainerId = newStatus.toLowerCase() + "__container";
+            document.getElementById(newContainerId).appendChild(userContainer);
             span.removeAttribute("class");
             span.classList.add(newStatusClass);
         },
@@ -751,6 +757,10 @@ document.getElementById('camera-btn').addEventListener('click', toggleCamera);
 document.getElementById('screen-btn').addEventListener('click', toggleScreen);
 document.getElementById('end__room__btn').addEventListener('click', endRoom);
 $(".student_status").on('click', changeStudentStatus);
+
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+});
 
 joinRoomInit();
 

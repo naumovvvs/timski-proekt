@@ -36,7 +36,7 @@ public class ProfessorRestController {
     @PostMapping("/add-course")
     public ResponseEntity<StudentDTO> addCourseToStudent(@RequestBody CourseToUserDTO csDto) {
         Course course = courseService.getCourseByName(csDto.getCourseName());
-        return ResponseEntity.ok().body(modelMapper.map(professorService.addCourseToProfessor(course, csDto.getUserId()),
+        return ResponseEntity.ok().body(modelMapper.map(professorService.addCourseToProfessor(course.getCode(), csDto.getUserId()),
                 StudentDTO.class));
     }
 }

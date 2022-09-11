@@ -10,6 +10,7 @@ import mk.ukim.finki.timskiproekt.service.StudentService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -47,5 +48,13 @@ public class StudentServiceImpl implements StudentService {
     public List<Course> getAllCoursesByStudent(Long id) {
         log.info("Getting courses for student with id: {}", id);
         return this.getStudentById(id).getCourses();
+    }
+
+    @Override
+    public List<Student> getAllStudents() {
+        return this.studentRepository.findAll().stream()
+                .filter(s -> s.getRoles().get(0).getName().equals("ROLE_STUDENT"))
+                .map(appUser -> (Student) appUser)
+                .collect(Collectors.toList());
     }
 }
