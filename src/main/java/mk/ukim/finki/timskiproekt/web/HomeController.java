@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDateTime;
+
 @Controller
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping({"/", "/home"})
@@ -35,6 +37,9 @@ public class HomeController {
             return "redirect:/access-denied";
         }
         if (!isProfessor && !this.roomService.checkIfStudentIsAllowed(roomObject, student)) {
+            return "redirect:/access-denied";
+        }
+        if(!isProfessor && roomObject.getOpenFrom().isAfter(LocalDateTime.now())) {
             return "redirect:/access-denied";
         }
         return "room";
