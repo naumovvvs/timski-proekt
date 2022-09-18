@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -13,4 +14,5 @@ public class SaveRoomDto {
     private LocalDateTime openTo;
     private Long courseId;
     private Long moderatorId;
+    private List<String> allowedStudents;
 }

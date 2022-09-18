@@ -22,7 +22,10 @@
     <div class="row">
         <div class="col-md-12 py-3 border-bottom d-flex justify-content-between align-items-center">
             <h1 class="course-title"></h1>
-            <button type="button" class="btn btn-primary" id="createRoom" data-bs-toggle="modal" data-bs-target="#addRoomModal">Create Room</button>
+            <div>
+                <button type="button" class="btn btn-primary" id="createRoom" data-bs-toggle="modal" data-bs-target="#addRoomModal">Create Room</button>
+                <button type="button" class="btn btn-success" id="addStudents" data-bs-toggle="modal" data-bs-target="#addStudentsModal">Add student</button>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -32,6 +35,7 @@
         <div class="col-md-12 mx-5 py-2 room-container">
         </div>
     </div>
+    <!-- Create room modal -->
     <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -52,18 +56,35 @@
                         <label>Open to</label>
                         <input type="datetime-local" class="form-control" id="dateEnd" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Enter the img URL">
                     </div>
-<!--                    <div class="mb-3">-->
-<!--                        <label>Course ID</label>-->
-<!--                        <input type="text" class="form-control" id="courseID" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Enter course ID">-->
-<!--                    </div>-->
-<!--                    <div class="mb-3">-->
-<!--                        <label>Moderator ID</label>-->
-<!--                        <input type="text" class="form-control" id="moderatorID" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Enter moderator ID">-->
-<!--                    </div>-->
+                    <div class="mb-3">
+                        <label>Choose allowed students:</label>
+                        <ul class="list-group allowed__students"></ul>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary" id="saveRoom">Save changes</button>
+                    <button type="submit" class="btn btn-primary" id="saveRoom">Save room</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add students modal -->
+    <div class="modal fade" id="addStudentsModal" tabindex="-1" aria-labelledby="addStudentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addStudentsModalLabel">Add students to course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <ul class="list-group list-group-flush all__students"></ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="addStudentsToCourse">Add</button>
                 </div>
             </div>
         </div>

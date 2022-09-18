@@ -16,10 +16,14 @@ let localScreenTracks;
 let sharingScreen = false;
 // token used for RTC authorization in Agora
 let rtcToken = null;
+// token used for Screen sharing RTC authorization in Agora
+let screenSharingRtcToken = null;
 // token used for RTM authorization in Agora
 let rtmToken = null;
 // RTC core object for functionality
 let client;
+// RTC screen sharing client
+let screenClient;
 // rtm client
 let rtmClient;
 // rtm channel
@@ -98,6 +102,31 @@ $.ajax({
     },
     success: function (response) {
         rtcToken = response;
+    },
+    error: function (rs) {
+        console.error(rs.status);
+        console.error(rs.responseText);
+    }
+});
+
+
+// object used for sending info related to creating the RTC token for screen sharing
+const agoraScreenShareDTO = {
+    "roomId": roomId,
+    "userId": uid*10000
+};
+// generate the RTC token used for AgoraRTC authentication (Screen sharing feature)
+$.ajax({
+    type: "POST",
+    url: "/api/user/agora/generate-rtc-token",
+    async: false,
+    data: JSON.stringify(agoraScreenShareDTO),
+    contentType: "application/json; charset=utf-8",
+    headers: {
+        "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+    },
+    success: function (response) {
+        screenSharingRtcToken = response;
     },
     error: function (rs) {
         console.error(rs.status);
@@ -227,10 +256,18 @@ let joinRoomInit = async () => {
     // join a specific room
     await client.join(APP_ID, roomId, rtcToken, uid);
 
+    // create AgoraRTC screen share client
+    screenClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+    await screenClient.join(APP_ID, roomId, screenSharingRtcToken, uid*10000);
+
     // event listener for AgoraRTC
     client.on('user-published', handleUserPublished);
     client.on('user-unpublished', handleUserUnpublished);
     client.on('user-left', handleUserLeft);
+
+    // event listener for AgoraRTC (screen share client)
+    screenClient.on('user-published', handleUserPublishedScreen);
+    screenClient.on('user-unpublished', handleUserUnpublishedScreen);
 
     // check if this is the start of the room
     let members = await channel.getMembers();
@@ -295,7 +332,7 @@ let joinVideoStream = async () => {
                   </div>`;
 
     // add video player for current user to the DOM
-    document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
+    document.getElementById('unidentified__container').insertAdjacentHTML('beforeend', player);
     // event listener for when user clicks, expand the video to presenter mode (full screen)
     document.getElementById(`user-container-${uid}`).addEventListener('click', expandVideoFrame);
 
@@ -316,8 +353,16 @@ let joinAudioStream = async () => {
 }
 
 let handleUserPublished = async (user, mediaType) => {
+    if(user.uid === currentLoggedInUser.id) {
+        return;
+    }
+
+    if(user.uid % 10000 === 0) {
+        return;
+    }
 
     console.log("Remote user published stream, client: " + uid + ", remote: " + user.uid);
+
     remoteUsers[user.uid] = user;
 
     // subscribe to current user's stream
@@ -333,7 +378,7 @@ let handleUserPublished = async (user, mediaType) => {
                   </div>`;
 
         // add player to the DOM
-        document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
+        document.getElementById('unidentified__container').insertAdjacentHTML('beforeend', player);
         document.getElementById(`user-container-${user.uid}`).addEventListener('click', expandVideoFrame);
     }
 
@@ -354,11 +399,24 @@ let handleUserPublished = async (user, mediaType) => {
 }
 
 let handleUserUnpublished = async (user, mediaType) => {
+    if(user.uid === currentLoggedInUser.id) {
+        return;
+    }
+
+    if(user.uid % 10000 === 0) {
+        return;
+    }
+
     console.log("Unsubscribe from user: " + user.uid + ", media type: " + mediaType);
     await client.unsubscribe(user,mediaType);
 }
 
 let handleUserLeft = async (user) => {
+    // if screen share user, don't run function
+    if(user.uid % 10000 === 0) {
+        return;
+    }
+
     console.log("User: " + user.uid + ", left the room!");
 
     // delete user from object of users
@@ -398,6 +456,71 @@ let handleUserLeft = async (user) => {
     });
 }
 
+let handleUserPublishedScreen = async(user, mediaType) => {
+    if(user.uid === currentLoggedInUser.id) {
+        return;
+    }
+
+    if(user.uid % 10000 !== 0) {
+        return;
+    }
+
+    console.log("Remote user published screen share stream, client: " + uid + ", remote: " + user.uid);
+
+    remoteUsers[user.uid] = user;
+
+    // subscribe to current user's stream
+    await screenClient.subscribe(user, mediaType);
+
+    // get player for user (check if already exists)
+    let player = document.getElementById(`user-container-${user.uid}-screen`);
+
+    // if the player is not present, then we create it (check for avoiding duplicated)
+    if(player == null) {
+        player = `<div class="video__container" id="user-container-${user.uid}-screen">
+                        <div class="video-player" id="user-${user.uid}-screen"></div>
+                  </div>`;
+
+        // add player to the DOM
+        document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
+        document.getElementById(`user-container-${user.uid}-screen`).addEventListener('click', expandVideoFrame);
+    }
+
+    // when a new user joins, if we are displaying someone set the new user to 100px right away
+    if(displayFrame.style.display) {
+        let videoFrame = document.getElementById(`user-container-${user.uid}-screen`);
+        videoFrame.style.height = '100px';
+        videoFrame.style.width = '100px';
+    }
+
+    if(mediaType === 'video'){
+        user.videoTrack.play(`user-${user.uid}-screen`);
+    }
+
+    if(mediaType === 'audio'){
+        user.audioTrack.play();
+    }
+}
+
+let handleUserUnpublishedScreen = async(user, mediaType) => {
+    if(user.uid === currentLoggedInUser.id) {
+        return;
+    }
+
+    if(user.uid % 10000 !== 0) {
+        return;
+    }
+
+    // remove current video track (camera) from user's video container
+    let obj = document.getElementById(`user-container-${user.uid}-screen`);
+    if(obj!==null) {
+        obj.remove();
+    }
+
+    console.log("Unsubscribe from user screen share, user: " + user.uid + ", media type: " + mediaType);
+    await screenClient.unsubscribe(user,mediaType);
+}
+
 let toggleMic = async (e) => {
     let button;
 
@@ -417,7 +540,7 @@ let toggleMic = async (e) => {
 
     // check if microphone is turned off
     if(!localTracks[0].enabled) {
-        // turn on (umnute) microphone
+        // turn on (unmute) microphone
         button.classList.add('active');
         await localTracks[0].setEnabled(true);
     } else {
@@ -456,26 +579,12 @@ let toggleCamera = async (e) => {
 
 let toggleScreen = async (e) => {
     let screenButton = e.currentTarget;
-    let cameraButton = document.getElementById('camera-btn');
 
     // turn off camera, turn on screen sharing
     if(!sharingScreen) {
         sharingScreen = true;
 
         screenButton.classList.add('active');
-
-        // turn off camera video and hide camera button
-        cameraButton.classList.remove('active');
-        cameraButton.style.display = 'none';
-        // check if camera stream already exists
-        if(localTracks[1] !== undefined) {
-            // disable camera
-            await localTracks[1].setEnabled(false);
-            // un-publish current video track
-            await client.unpublish(localTracks[1]);
-            // remove current video track (camera) from user's video container
-            document.getElementById(`user-container-${uid}`).remove();
-        }
 
         // create video track for screen share
         localScreenTracks = await AgoraRTC.createScreenVideoTrack();
@@ -484,19 +593,19 @@ let toggleScreen = async (e) => {
         displayFrame.style.display = 'block';
 
         // create a new player for screen share
-        let player = `<div class="video__container" id="user-container-${uid}">
-                        <div class="video-player" id="user-${uid}"></div>
+        let player = `<div class="video__container" id="user-container-${uid}-screen">
+                        <div class="video-player" id="user-${uid}-screen"></div>
                   </div>`;
         // add player to HTML
         displayFrame.insertAdjacentHTML('beforeend', player);
         // make it clickable (expands on click)
-        document.getElementById(`user-container-${uid}`).addEventListener('click', expandVideoFrame);
+        document.getElementById(`user-container-${uid}-screen`).addEventListener('click', expandVideoFrame);
 
-        userIdInDisplayFrame = `user-container-${uid}`;
-        localScreenTracks.play(`user-${uid}`);
+        userIdInDisplayFrame = `user-container-${uid}-screen`;
+        localScreenTracks.play(`user-${uid}-screen`);
 
         // publish screen share video
-        await client.publish([localScreenTracks]);
+        await screenClient.publish([localScreenTracks]);
 
         // set other participants video stream boxes to 100px (because someone is sharing)
         let videoFrames = document.getElementsByClassName('video__container');
@@ -509,17 +618,14 @@ let toggleScreen = async (e) => {
     } else {
         sharingScreen = false;
 
-        cameraButton.style.display = 'block';
+        //cameraButton.style.display = 'block';
         screenButton.classList.remove('active');
 
         // remove current video track (screen share track)
-        document.getElementById(`user-container-${uid}`).remove();
+        document.getElementById(`user-container-${uid}-screen`).remove();
         // un-publish current screen share video track
-        await client.unpublish([localScreenTracks]);
+        await screenClient.unpublish([localScreenTracks]);
         displayFrame.style.display = 'none';
-
-        // reset local camera track and create it again on next camera button click
-        localTracks[1] = undefined;
 
         // set participants video stream boxes to 300px (because someone stopped screen sharing)
         let videoFrames = document.getElementsByClassName('video__container');
@@ -623,7 +729,13 @@ let changeStudentStatus = async (e) => {
             let span = e.target.parentElement.parentElement.previousElementSibling.previousElementSibling;
             let userID = e.target.parentElement.parentElement.parentElement.getAttribute('id').match((/(\d+)/))[0];
             console.log(userID);
-            document.getElementById("user-container-" + userID).style.borderColor = newBorderClass;
+            let userContainer = document.getElementById("user-container-" + userID);
+            userContainer.style.borderColor = newBorderClass;
+            // change user-container position based on the new status
+            let parentElem = userContainer.parentElement;
+            parentElem.removeChild(userContainer);
+            let newContainerId = newStatus.toLowerCase() + "__container";
+            document.getElementById(newContainerId).appendChild(userContainer);
             span.removeAttribute("class");
             span.classList.add(newStatusClass);
         },
@@ -645,6 +757,10 @@ document.getElementById('camera-btn').addEventListener('click', toggleCamera);
 document.getElementById('screen-btn').addEventListener('click', toggleScreen);
 document.getElementById('end__room__btn').addEventListener('click', endRoom);
 $(".student_status").on('click', changeStudentStatus);
+
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+});
 
 joinRoomInit();
 

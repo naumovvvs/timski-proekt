@@ -1,5 +1,6 @@
 package mk.ukim.finki.timskiproekt.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.LazyCollection;
@@ -17,6 +18,7 @@ public class Student extends AppUser {
     @Column(unique=true)
     private Long index;
 
+    @JsonIgnore
     @LazyCollection(LazyCollectionOption.FALSE)
     @ManyToMany
     private List<Course> courses = new ArrayList<>();

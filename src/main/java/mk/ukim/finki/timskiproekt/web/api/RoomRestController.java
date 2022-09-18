@@ -2,10 +2,7 @@ package mk.ukim.finki.timskiproekt.web.api;
 
 import lombok.AllArgsConstructor;
 import mk.ukim.finki.timskiproekt.model.*;
-import mk.ukim.finki.timskiproekt.model.dto.EditRoomDto;
-import mk.ukim.finki.timskiproekt.model.dto.EditStudentStatusDto;
-import mk.ukim.finki.timskiproekt.model.dto.InterruptionDTO;
-import mk.ukim.finki.timskiproekt.model.dto.SaveRoomDto;
+import mk.ukim.finki.timskiproekt.model.dto.*;
 import mk.ukim.finki.timskiproekt.model.enums.RoomStatus;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
 import mk.ukim.finki.timskiproekt.service.RoomService;
@@ -141,6 +138,12 @@ public class RoomRestController {
     @GetMapping("/end/{roomId}")
     public void endSession(@PathVariable Long roomId) {
         this.roomService.endRoom(roomId);
+    }
+
+    @GetMapping("/end/{roomId}/room-summary/{studentId}")
+    public ResponseEntity<RoomSummaryDTO> getRoomSummary(@PathVariable Long roomId, @PathVariable Long studentId) {
+        return Optional.of(ResponseEntity.ok().body(this.roomService.getRoomSummary(roomId, studentId)))
+                .orElseThrow(() -> new RuntimeException("Room summary ERROR"));
     }
 
     @GetMapping("/change/{id}/{newStatus}")

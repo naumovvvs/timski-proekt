@@ -10,12 +10,11 @@ import mk.ukim.finki.timskiproekt.model.enums.Semester;
 import mk.ukim.finki.timskiproekt.repository.CourseRepository;
 import mk.ukim.finki.timskiproekt.repository.StudentRepository;
 import mk.ukim.finki.timskiproekt.service.CourseService;
+import mk.ukim.finki.timskiproekt.service.StudentService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +23,7 @@ public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
     private final StudentRepository studentRepository;
+    private final StudentService studentService;
 
     @Override
     public Course getCourseByName(String name) {
@@ -57,24 +57,28 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public List<Student> getAllStudentsInCourse(String courseCode) {
+        log.info("Getting all students in course with code: {}", courseCode);
+        return this.courseRepository.findByCode(courseCode).getStudents();
+    }
+
+    @Override
+    public List<Student> getAllStudentsNotInCourse(String courseCode) {
+        List<Student> result = this.studentService.getAllStudents();
+        // from all the students retain the ones not enrolled in the course with @{courseCode}
+        result.removeAll(this.getAllStudentsInCourse(courseCode));
+        log.info("Getting all students not in course with code: {}", courseCode);
+        return result;
+    }
+
+    @Override
     public Course createCourse(CourseDTO courseDTO) {
         log.info("Creating course with name: {}, and code: {}", courseDTO.getName(), courseDTO.getCode());
-
         // add all students to course on course creation (change in future)
-        List<Student> allStudents = this.studentRepository.findAll().stream()
-                .filter(x -> x.getRoles().get(0).getName().equals("ROLE_STUDENT"))
-                .map(appUser -> (Student)appUser)
-                .collect(Collectors.toList());
-
+        // Update: removed functionality, in order to enable enrolling students to courses - on demand
         Course course = this.courseRepository.save(new Course(null, courseDTO.getName(), courseDTO.getCode(),
-                courseDTO.getImageUrl(), courseDTO.getSemester(), new ArrayList<>(), allStudents));
-
-        allStudents.forEach(x-> {
-            x.getCourses().add(course);
-            this.studentRepository.save(x);
-        });
-
-        return course;
+                courseDTO.getImageUrl(), courseDTO.getSemester(), new ArrayList<>(), new ArrayList<>()));
+        return this.courseRepository.save(course);
     }
 
     @Override
@@ -99,4 +103,20 @@ public class CourseServiceImpl implements CourseService {
         course.getRooms().remove(room);
         this.courseRepository.save(course);
     }
+
+    @Override
+    public void addStudentsToCourse(List<String> studentIndexes, String courseCode) {
+        log.info("Adding multiple students to course with code: {}", courseCode);
+        Course course = this.courseRepository.findByCode(courseCode);
+        for (String index : studentIndexes) {
+            Student student = this.studentRepository.getByIndex(Long.parseLong(index));
+            if (!course.getStudents().contains(student)) {
+                student.getCourses().add(course);
+                this.studentRepository.save(student);
+                course.getStudents().add(student);
+            }
+        }
+        this.courseRepository.save(course);
+    }
 }
+
