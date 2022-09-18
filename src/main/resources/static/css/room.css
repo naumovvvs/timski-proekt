@@ -103,7 +103,7 @@
 
 .member_name{
   font-size: 14px;
-  line-height: 0;
+  line-height: 1;
 }
 
 .member_name:hover{
@@ -373,4 +373,50 @@
 .stream__actions a:hover,
 .stream__actions button:hover {
   background-color: #845695;
+}
+
+.message__wrapper {
+  display:flex;
+  align-items: center;
+}
+
+.thumbtack-messages {
+  font-size: 10px;
+  padding: 5px 5px;
+  border: 1px solid gray;
+  border-radius: 50px;
+  color: gray;
+}
+.thumbtack-messages:hover {
+  font-size: 10px;
+  padding: 5px 5px;
+  border: 1px solid white;
+  border-radius: 50px;
+  color: white;
+  background-color: black;
+  cursor: pointer;
+}
+
+.thumbtack-messages-pinned {
+  font-size: 10px;
+  padding: 5px 5px;
+  border: 1px solid white;
+  border-radius: 50px;
+  color: white;
+  background-color: black;
+  cursor: pointer;
+}
+
+#pinned-message {
+  position: fixed;
+  z-index:999;
+  background: rgba(0, 0, 0, 0.6);
+  display:flex;
+  align-items:center;
+  width: 22%;
+  display: none;
+}
+
+.pinned {
+  margin: 10px;
 }

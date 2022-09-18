@@ -5,8 +5,11 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Room</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
     <link rel='stylesheet' type='text/css' media='screen' href='/css/main.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='/css/room.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <style>
         ul.dropdown-menu {
             margin-top: -2px;
@@ -102,6 +105,10 @@
             </section>
 
             <section id="messages__container">
+                <div id="pinned-message">
+                    <i class="fa-solid fa-thumbtack pinned"></i>
+                    <p class="pin-message-paragraph">Some pinned message adsasdadsasdasdasd asdassdadsa asdsadsadasasd ad</p>
+                </div>
                 <div id="messages">
 
 <!--                    <div class="message__wrapper">-->
@@ -117,12 +124,15 @@
 <!--                            <p class="message__text">Parabellum.</p>-->
 <!--                        </div>-->
 <!--                    </div>-->
-
                 </div>
 
                 <form id="message__form">
+                    <div id="summernote">
+                    </div>
+                    <button type="button" class="btn btn-primary" id="pinMessage">Pin</button>
                     <input type="text" name="message" placeholder="Send a message...." />
                 </form>
+
 
             </section>
         </div>
@@ -138,4 +148,18 @@
     <script type="text/javascript" src="/js/room.js"></script>
     <script type="text/javascript" src="/js/room_rtm.js"></script>
     <script type="text/javascript" src="/js/room_rtc.js"></script>
+    <script src="https://cdn.tiny.cloud/1/whpuocgb53rq9dq25pxcx1dqz6i1siose7ydc5weurl0ai4b/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tinymce/tinymce-jquery@2/dist/tinymce-jquery.min.js"></script>
+    <script>
+        tinymce.init({
+            selector: '#summernote',
+            plugins: 'a11ychecker advcode casechange export formatpainter image editimage linkchecker autolink lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tableofcontents tinycomments tinymcespellchecker',
+            toolbar: 'a11ycheck addcomment showcomments casechange checklist code export formatpainter image editimage pageembed permanentpen table tableofcontents',
+            toolbar_mode: 'floating',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+            menubar: false,
+            comments: false
+        });
+    </script>
 </html>
