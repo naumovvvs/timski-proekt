@@ -151,8 +151,10 @@ let addMessageToDom = async (name, message, sender) => {
                             <strong class="message__author">${name}</strong>
                             <p class="message__text">${message}</p>
                         </div>
+                        <div class="pin-message">
+                        <i class="fa-solid fa-thumbtack thumbtack-messages"></i>
+                        </div>
                     </div>`;
-
     // add new message to the HTML DOM
     messagesWrapper.insertAdjacentHTML('beforeend', newMessage);
 
@@ -185,6 +187,15 @@ let addMessageToDom = async (name, message, sender) => {
             console.error(rs.status);
             console.error(rs.responseText);
         }
+    });
+    $(".pin-message").on("click", function(){
+        $(".thumbtack-messages").removeClass("thumbtack-messages-pinned");
+        $("#pinned-message").css("display", "flex");
+        let pinMessage = $(this).siblings().children()[1].innerHTML;
+        $(".pin-message-paragraph").text(pinMessage);
+        var clientHeight = document.getElementById('pinned-message').clientHeight;
+        $("#messages").css("margin-top", clientHeight);
+        $(this).children().addClass("thumbtack-messages-pinned");
     });
 }
 
@@ -263,3 +274,6 @@ let leaveChannel = async () => {
 
 window.addEventListener('beforeunload', leaveChannel);
 document.getElementById('message__form').addEventListener('submit', sendMessage);
+    $("#pinMessage").on("click", function () {
+        let formattedText = tinymce.get("summernote").getContent()
+    });
