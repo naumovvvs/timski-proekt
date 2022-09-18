@@ -1,5 +1,5 @@
 // function for waiting x seconds
-const delay = (n) => new Promise( r => setTimeout(r, n*1000));
+const delay = (n) => new Promise(r => setTimeout(r, n * 1000));
 
 let handleMemberJoined = async (MemberId) => {
     // add user to participants list
@@ -12,7 +12,7 @@ let handleMemberJoined = async (MemberId) => {
     await updateMemberTotal(members);
 
     // add welcome message to DOM only if user is of type 'professor'
-    if(currentLoggedInStudent==="") {
+    if (currentLoggedInStudent === "") {
         // get user's name by key MemberId from storage
         let {name} = await rtmClient.getUserAttributesByKeys(MemberId, ['name']);
         // add bot message for welcoming user
@@ -37,27 +37,49 @@ let addMemberToDom = async (MemberId) => {
     let memberItem;
 
     // check if object parsed successfully, if not it means that the user is not a student, but a professor
-    if(studentObj === "" || studentObj === null) {
+    if (studentObj === "" || studentObj === null) {
         pom = "(MOD)";
         memberItem = `<div class="member__wrapper" id="member__${MemberId}__wrapper">
                         <span class="mod__icon"></span>
                         <p class="member_name">${name} ${pom}</p>
                       </div>`;
+        // add new participant to participants list
+        membersWrapper.insertAdjacentHTML('beforeend', memberItem);
     } else {
         pom = "(" + studentObj.index + ")";
         memberItem = `<div class="member__wrapper" id="member__${MemberId}__wrapper">
                         <span class="gray__icon"></span>
                         <p class="member_name">${name} ${pom}</p>
-                        <ul class="dropdown-menu">
+                      </div>`;
+
+
+        // add new participant to participants list
+        membersWrapper.insertAdjacentHTML('beforeend', memberItem);
+
+        $.ajax({
+            url: "/api/user/current",
+            type: "GET",
+            async: false,
+            headers: {
+                "Authorization": "Bearer " + JSON.parse(window.localStorage.getItem("accessToken"))
+            },
+            success: function (response) {
+                if (response.roles[0].name === "ROLE_PROFESSOR") {
+                    let statusList = `<ul class="dropdown-menu">
                             <li onclick="changeStudentStatus(event)" class="student_status"><button id="IDENTIFIED" style="background-color: #2aca3e">Identify</button></li>
                             <li onclick="changeStudentStatus(event)" class="student_status"><button id="SUSPICIOUS" style="background-color: #FFA500">Watch</button></li>
                             <li onclick="changeStudentStatus(event)" class="student_status"><button id="BLOCKED" style="background-color: #ff0000">Block</button></li>
-                        </ul>
-                      </div>`;
+                        </ul>`;
+                    let id = "member__" + MemberId + "__wrapper";
+                    $("#" + id).append(statusList);
+                }
+            },
+            error: function (rs) {
+                console.error(rs.status);
+                console.error(rs.responseText);
+            }
+        });
     }
-
-    // add new participant to participants list
-    membersWrapper.insertAdjacentHTML('beforeend', memberItem);
 }
 
 let updateMemberTotal = async (members) => {
@@ -86,7 +108,7 @@ let removeMemberFromDom = async (MemberId) => {
     memberWrapper.remove();
 
     // add bot message if the user is professor
-    if(currentLoggedInStudent==="") {
+    if (currentLoggedInStudent === "") {
         await addBotMessageToDom(`${name} has left the room.`);
     }
 }
@@ -97,7 +119,7 @@ let getMembers = async () => {
     await updateMemberTotal(members);
 
     // add participants to participants list
-    for(let i=0; i<members.length; i++) {
+    for (let i = 0; i < members.length; i++) {
         await addMemberToDom(members[i]);
     }
 }
@@ -109,14 +131,14 @@ let handleChannelMessage = async (messData, memberId) => {
     let data = JSON.parse(messData.text);
 
     // if the message is of type 'chat', add it to the DOM
-    if(data.type === 'chat') {
+    if (data.type === 'chat') {
         await addMessageToDom(data.displayName, data.message, memberId);
     } else if (data.type === 'session') {
         await leaveChannel();
         await getRoomInfo(currentLoggedInUser.id, roomId);
         await delay(10);
         window.location.href = "/subject";
-    } else if (data.type === 'bot' && currentLoggedInStudent==="") {
+    } else if (data.type === 'bot' && currentLoggedInStudent === "") {
         await addBotMessageToDom(data.message);
     } else if (data.type === 'microphoneToggle') {
         await toggleMic();
@@ -128,7 +150,7 @@ let handleChannelMessage = async (messData, memberId) => {
 }
 
 let getRoomInfo = async (userId, roomId) => {
-    let url = "/api/room/end/"+roomId+"/room-summary/"+userId;
+    let url = "/api/room/end/" + roomId + "/room-summary/" + userId;
     let room = null;
 
     $.ajax({
@@ -147,7 +169,7 @@ let getRoomInfo = async (userId, roomId) => {
         }
     });
 
-    if(room!=null) {
+    if (room != null) {
         alert("Room has ended! Press ok to redirect...\n\n"
             + "Room summary:\n"
             + "Name: " + room.name + "\n"
@@ -166,7 +188,7 @@ let changeUserStatus = async (newStatus, userId) => {
     console.log("CHANGE USER STATUS (COLOR)")
 
     // change status in participants
-    let obj = $("#member__"+userId+"__wrapper");
+    let obj = $("#member__" + userId + "__wrapper");
 
     let previousStatus = obj[0].firstElementChild.className;
     // remove previous status
@@ -176,7 +198,7 @@ let changeUserStatus = async (newStatus, userId) => {
 
     // change status in video container
     let videoContainer = document.getElementById("user-container-" + userId);
-    if(videoContainer!==null) {
+    if (videoContainer !== null) {
         videoContainer.style.borderColor = "orange";
     }
 }
@@ -196,8 +218,8 @@ let addMessageToDom = async (name, message, sender) => {
     messagesWrapper.insertAdjacentHTML('beforeend', newMessage);
 
     // get the last message sent, and scroll to it so the newest message is always into view
-    let lastMessage= document.querySelector('#messages .message__wrapper:last-child');
-    if(lastMessage) {
+    let lastMessage = document.querySelector('#messages .message__wrapper:last-child');
+    if (lastMessage) {
         lastMessage.scrollIntoView();
     }
 }
@@ -216,8 +238,8 @@ let addBotMessageToDom = async (botMessage) => {
     messagesWrapper.insertAdjacentHTML('beforeend', newMessage);
 
     // scroll to the newest message
-    let lastMessage= document.querySelector('#messages .message__wrapper:last-child');
-    if(lastMessage) {
+    let lastMessage = document.querySelector('#messages .message__wrapper:last-child');
+    if (lastMessage) {
         lastMessage.scrollIntoView();
     }
 }
@@ -227,28 +249,34 @@ let sendRoomHasEndedMessage = async () => {
     // add bot message to professor's chat
     await addBotMessageToDom("Session has ended! Redirecting...");
 
-    channel.sendMessage({text:JSON.stringify({
+    channel.sendMessage({
+        text: JSON.stringify({
             'type': 'session_end',
             'message': "Session has ended! Redirecting..."
-    })});
+        })
+    });
 
     // this function sends message to channel (all users) to end session
-    channel.sendMessage({text:JSON.stringify({
+    channel.sendMessage({
+        text: JSON.stringify({
             'type': 'session',
             'message': "End session"
-    })});
+        })
+    });
 
     // the professor logs out after 10 seconds
     await delay(10);
     // redirect to previous page
-    window.location.href="/subject";
+    window.location.href = "/subject";
 }
 
 let sendToggleAllMicrophonesMessage = async (e) => {
-    channel.sendMessage({text:JSON.stringify({
+    channel.sendMessage({
+        text: JSON.stringify({
             'type': 'microphoneToggle',
             'message': "Toggle all microphones..."
-        })});
+        })
+    });
 }
 
 let sendMessage = async (e) => {
@@ -257,11 +285,14 @@ let sendMessage = async (e) => {
     // get message content that was written in the form
     let message = e.target.message.value;
     // this function sends message to channel (all users), can also send p2p message (direct) with different function
-    channel.sendMessage({text:JSON.stringify({
-            'type': 'chat',
-            'message': message,
-            'displayName': currentLoggedInUser.name}
-        )});
+    channel.sendMessage({
+        text: JSON.stringify({
+                'type': 'chat',
+                'message': message,
+                'displayName': currentLoggedInUser.name
+            }
+        )
+    });
 
     // add message element to the DOM
     await addMessageToDom(currentLoggedInUser.name, message, uid);

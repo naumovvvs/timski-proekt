@@ -49,7 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.authorizeRequests().antMatchers("/login/**", "/api/token/refresh/**",
                 "/css/**", "/js/**", "/img/**", "/home", "/api/course/all-courses", "/subject", "/", "/room",
-                "/access-denied", "/not-found").permitAll();
+                "/access-denied", "/not-found", "/report/**").permitAll();
         //http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
         //http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/test/**").authenticated();
         http.authorizeRequests().anyRequest().authenticated();

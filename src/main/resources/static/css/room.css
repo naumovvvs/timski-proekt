@@ -103,7 +103,7 @@
 
 .member_name{
   font-size: 14px;
-  line-height: 0;
+  line-height: 1;
 }
 
 .member_name:hover{
