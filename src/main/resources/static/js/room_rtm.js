@@ -212,10 +212,8 @@ let addMessageToDom = async (name, message, sender) => {
                             <strong class="message__author">${name}</strong>
                             <p class="message__text">${message}</p>
                         </div>
-                        <div class="pin-message">
-                        <i class="fa-solid fa-thumbtack thumbtack-messages"></i>
-                        </div>
                     </div>`;
+
     // add new message to the HTML DOM
     messagesWrapper.insertAdjacentHTML('beforeend', newMessage);
 
@@ -224,40 +222,6 @@ let addMessageToDom = async (name, message, sender) => {
     if (lastMessage) {
         lastMessage.scrollIntoView();
     }
-
-    // send message to backend
-    let messageDto = {
-        content: message,
-        senderId: sender
-    }
-
-    console.log(messageDto)
-    $.ajax({
-        url: "api/chat/save-msg/" + roomId,
-        type: "POST",
-        data: JSON.stringify(messageDto),
-        contentType: "application/json",
-        headers: {
-            "Authorization":
-                "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
-        },
-        success: function (data, response) {
-            console.log(response);
-        },
-        error: function (rs) {
-            console.error(rs.status);
-            console.error(rs.responseText);
-        }
-    });
-    $(".pin-message").on("click", function(){
-        $(".thumbtack-messages").removeClass("thumbtack-messages-pinned");
-        $("#pinned-message").css("display", "flex");
-        let pinMessage = $(this).siblings().children()[1].innerHTML;
-        $(".pin-message-paragraph").text(pinMessage);
-        var clientHeight = document.getElementById('pinned-message').clientHeight;
-        $("#messages").css("margin-top", clientHeight);
-        $(this).children().addClass("thumbtack-messages-pinned");
-    });
 }
 
 let addBotMessageToDom = async (botMessage) => {
@@ -368,6 +332,16 @@ let leaveChannel = async () => {
 
 window.addEventListener('beforeunload', leaveChannel);
 document.getElementById('message__form').addEventListener('submit', sendMessage);
-    $("#pinMessage").on("click", function () {
-        let formattedText = tinymce.get("summernote").getContent()
-    });
+
+$(".html__editor__show").on("click",function () {
+    $(this).css("display", "none");
+    $(".html__editor__hide").css("display", "block");
+    $(".classic__message").css("display", "none");
+});
+
+$(".html__editor__hide").on("click",function () {
+    $(this).css("display", "none");
+    $(".html__editor__show").css("display", "block");
+    $(".classic__message").css("display", "block");
+
+});
