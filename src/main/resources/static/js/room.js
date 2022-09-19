@@ -91,6 +91,8 @@ $(document).ready(function() {
       if(!(response.roles[0].name === "ROLE_PROFESSOR")){
         $("#end__room__btn").css("display", "none");
         $("#admin-mic-btn").css("display", "none");
+        $(".html__editor__show").css("display", "none");
+        $(".html__editor__hide").css("display", "none");
       }
     },
     error: function (rs) {

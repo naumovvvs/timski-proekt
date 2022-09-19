@@ -284,6 +284,10 @@ let sendMessage = async (e) => {
 
     // get message content that was written in the form
     let message = e.target.message.value;
+
+    if(message === "" || message === " ") {
+        return;
+    }
     // this function sends message to channel (all users), can also send p2p message (direct) with different function
     channel.sendMessage({
         text: JSON.stringify({
@@ -325,6 +329,48 @@ let sendMessage = async (e) => {
     e.target.reset();
 }
 
+let sendEditedMessage = async (message) => {
+    if(message === "") {
+        return;
+    }
+
+    channel.sendMessage({
+        text: JSON.stringify({
+                'type': 'chat',
+                'message': message,
+                'displayName': currentLoggedInUser.name
+            }
+        )
+    });
+
+    // add message element to the DOM
+    await addMessageToDom(currentLoggedInUser.name, message, uid);
+
+    // send message to backend
+    let messageDto = {
+        content: message,
+        senderId: uid
+    }
+
+    $.ajax({
+        url: "api/chat/save-msg/" + roomId,
+        type: "POST",
+        data: JSON.stringify(messageDto),
+        contentType: "application/json",
+        headers: {
+            "Authorization":
+                "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
+        },
+        success: function (data, response) {
+            console.log(response);
+        },
+        error: function (rs) {
+            console.error(rs.status);
+            console.error(rs.responseText);
+        }
+    });
+}
+
 let leaveChannel = async () => {
     await channel.leave();
     await rtmClient.logout();
@@ -332,16 +378,18 @@ let leaveChannel = async () => {
 
 window.addEventListener('beforeunload', leaveChannel);
 document.getElementById('message__form').addEventListener('submit', sendMessage);
+$("#btn_editor").css("display", "none");
 
 $(".html__editor__show").on("click",function () {
     $(this).css("display", "none");
     $(".html__editor__hide").css("display", "block");
     $(".classic__message").css("display", "none");
+    $("#btn_editor").css("display", "block");
 });
 
 $(".html__editor__hide").on("click",function () {
     $(this).css("display", "none");
     $(".html__editor__show").css("display", "block");
     $(".classic__message").css("display", "block");
-
+    $("#btn_editor").css("display", "none");
 });

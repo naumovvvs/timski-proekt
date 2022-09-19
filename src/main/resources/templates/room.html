@@ -45,11 +45,11 @@
        </div>
 
         <div id="nav__links">
-            <button type="button" class="html__editor__show" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="tinymce.activeEditor.show()">
-                HTML Editor Show
+            <button type="button" class="html__editor__show" onclick="tinymce.activeEditor.show()">
+                Show HTML Editor
             </button>
-            <button type="button" class="html__editor__hide" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="tinymce.activeEditor.hide()">
-                HTML Editor Hide
+            <button type="button" class="html__editor__hide" onclick="tinymce.activeEditor.hide()">
+                Hide HTML Editor
             </button>
             <button id="chat__button"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" fill="#ede0e0" clip-rule="evenodd"><path d="M24 20h-3v4l-5.333-4h-7.667v-4h2v2h6.333l2.667 2v-2h3v-8.001h-2v-2h4v12.001zm-15.667-6l-5.333 4v-4h-3v-14.001l18 .001v14h-9.667zm-6.333-2h3v2l2.667-2h8.333v-10l-14-.001v10.001z"/></svg></button>
             <a class="nav__link" id="end__room__btn" href="#">
@@ -131,6 +131,7 @@
                     <div class="html__editor__section" style="display: none">
 
                     </div>
+                    <button id="btn_editor">Send edited</button>
                 </form>
 
             </section>
@@ -139,6 +140,7 @@
 
 </body>
 
+    <script src="https://cdn.tiny.cloud/1/whpuocgb53rq9dq25pxcx1dqz6i1siose7ydc5weurl0ai4b/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
@@ -147,12 +149,11 @@
     <script type="text/javascript" src="/js/room.js"></script>
     <script type="text/javascript" src="/js/room_rtm.js"></script>
     <script type="text/javascript" src="/js/room_rtc.js"></script>
-    <script src="https://cdn.tiny.cloud/1/whpuocgb53rq9dq25pxcx1dqz6i1siose7ydc5weurl0ai4b/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
         tinymce.init({
             selector: '.html__editor__section',
-            plugins: 'a11ychecker advcode casechange export formatpainter image editimage linkchecker autolink lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tableofcontents tinycomments tinymcespellchecker',
-            toolbar: 'a11ycheck addcomment showcomments casechange checklist code export formatpainter image editimage pageembed permanentpen table tableofcontents',
+            plugins: 'casechange export linkchecker autolink lists checklist table advtable tinymcespellchecker textcolor',
+            toolbar: 'casechange checklist export table forecolor backcolor',
             toolbar_mode: 'floating',
             tinycomments_mode: 'embedded',
             tinycomments_author: 'Author name',
@@ -161,6 +162,18 @@
             skin: "oxide-dark",
             content_css: "dark"
         });
-        tinymce.activeEditor.hide();
+        //tinymce.activeEditor.hide();
+
+        function hideBrand() {
+            $(".tox-statusbar__branding").css("display", "none");
+            $(".tox-statusbar__path").css("display", "none");
+        }
+        setTimeout(hideBrand, 500);
+
+        document.getElementById("btn_editor").addEventListener("click", () => {
+            var myContent = tinymce.activeEditor.getContent();
+            sendEditedMessage(myContent);
+            tinymce.activeEditor.setContent("");
+        });
     </script>
 </html>
