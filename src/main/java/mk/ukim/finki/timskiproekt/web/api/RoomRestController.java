@@ -3,8 +3,11 @@ package mk.ukim.finki.timskiproekt.web.api;
 import lombok.AllArgsConstructor;
 import mk.ukim.finki.timskiproekt.model.*;
 import mk.ukim.finki.timskiproekt.model.dto.*;
+import mk.ukim.finki.timskiproekt.model.dto.projections.InterruptionInRoomReportDto;
+import mk.ukim.finki.timskiproekt.model.dto.projections.MessageInRoomReportDto;
 import mk.ukim.finki.timskiproekt.model.enums.RoomStatus;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
+import mk.ukim.finki.timskiproekt.model.dto.projections.StudentInRoomReportDto;
 import mk.ukim.finki.timskiproekt.service.RoomService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -162,5 +165,20 @@ public class RoomRestController {
     public void registerInterruption(@RequestBody InterruptionDTO interruptionDTO) {
         this.roomService.addInterruptionToSession(interruptionDTO.getTime(), interruptionDTO.getTotalDuration(),
                 interruptionDTO.getRoomId(), interruptionDTO.getStudentId());
+    }
+
+    @GetMapping("/report/{id}")
+    public List<StudentInRoomReportDto> getRoomReport(@PathVariable Long id) {
+        return this.roomService.getStudentInRoomReport(id);
+    }
+
+    @GetMapping("/msg-report/{id}")
+    public List<MessageInRoomReportDto> getMessagesReport(@PathVariable Long id) {
+        return this.roomService.getMessageInRoomReport(id);
+    }
+
+    @GetMapping("/interruption-report/{id}")
+    public List<InterruptionInRoomReportDto> getInterruptionsReport(@PathVariable Long id) {
+        return this.roomService.getInterruptionInRoomReport(id);
     }
 }

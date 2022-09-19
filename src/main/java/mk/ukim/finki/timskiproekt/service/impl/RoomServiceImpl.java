@@ -7,8 +7,11 @@ import mk.ukim.finki.timskiproekt.model.dto.EditRoomDto;
 import mk.ukim.finki.timskiproekt.model.dto.EditStudentStatusDto;
 import mk.ukim.finki.timskiproekt.model.dto.RoomSummaryDTO;
 import mk.ukim.finki.timskiproekt.model.dto.SaveRoomDto;
+import mk.ukim.finki.timskiproekt.model.dto.projections.InterruptionInRoomReportDto;
+import mk.ukim.finki.timskiproekt.model.dto.projections.MessageInRoomReportDto;
 import mk.ukim.finki.timskiproekt.model.enums.RoomStatus;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
+import mk.ukim.finki.timskiproekt.model.dto.projections.StudentInRoomReportDto;
 import mk.ukim.finki.timskiproekt.repository.*;
 import mk.ukim.finki.timskiproekt.service.RoomService;
 import org.springframework.stereotype.Service;
@@ -352,5 +355,20 @@ public class RoomServiceImpl implements RoomService {
         } else {
             throw new RuntimeException("App user not found");
         }
+    }
+
+    @Override
+    public List<StudentInRoomReportDto> getStudentInRoomReport(Long roomId) {
+        return this.studentInRoomRepository.generateStudentInRoomReport(roomId);
+    }
+
+    @Override
+    public List<MessageInRoomReportDto> getMessageInRoomReport(Long roomId) {
+        return this.chatRepository.generateMessageInRoomReport(roomId);
+    }
+
+    @Override
+    public List<InterruptionInRoomReportDto> getInterruptionInRoomReport(Long roomId) {
+        return this.interruptionRepository.generateInterruptionsInRoomReport(roomId);
     }
 }

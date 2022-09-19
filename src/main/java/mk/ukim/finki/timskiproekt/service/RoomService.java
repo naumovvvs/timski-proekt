@@ -5,8 +5,11 @@ import mk.ukim.finki.timskiproekt.model.dto.EditRoomDto;
 import mk.ukim.finki.timskiproekt.model.dto.EditStudentStatusDto;
 import mk.ukim.finki.timskiproekt.model.dto.RoomSummaryDTO;
 import mk.ukim.finki.timskiproekt.model.dto.SaveRoomDto;
+import mk.ukim.finki.timskiproekt.model.dto.projections.InterruptionInRoomReportDto;
+import mk.ukim.finki.timskiproekt.model.dto.projections.MessageInRoomReportDto;
 import mk.ukim.finki.timskiproekt.model.enums.RoomStatus;
 import mk.ukim.finki.timskiproekt.model.enums.StudentStatus;
+import mk.ukim.finki.timskiproekt.model.dto.projections.StudentInRoomReportDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,4 +64,10 @@ public interface RoomService {
     void addInterruptionToSession(String time, int totalDuration, Long roomId, Long studentId);
 
     RoomSummaryDTO getRoomSummary(Long roomId, Long studentId);
+
+    List<StudentInRoomReportDto> getStudentInRoomReport(Long roomId);
+
+    List<MessageInRoomReportDto> getMessageInRoomReport(Long roomId);
+
+    List<InterruptionInRoomReportDto> getInterruptionInRoomReport(Long roomId);
 }
