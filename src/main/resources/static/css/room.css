@@ -1,4 +1,4 @@
-.container {
+.container__main {
   margin-top: 74px;
   height: calc(100vh - 74px);
   width: 100%;
@@ -375,48 +375,81 @@
   background-color: #845695;
 }
 
-.message__wrapper {
-  display:flex;
-  align-items: center;
-}
 
-.thumbtack-messages {
-  font-size: 10px;
-  padding: 5px 5px;
-  border: 1px solid gray;
-  border-radius: 50px;
-  color: gray;
-}
-.thumbtack-messages:hover {
-  font-size: 10px;
-  padding: 5px 5px;
-  border: 1px solid white;
-  border-radius: 50px;
-  color: white;
-  background-color: black;
+                                                     /* CSS */
+.html__editor__show {
+  background: #0267ab;
+  border: 1px solid #0267ab;
+  border-radius: 6px;
+  box-shadow: rgba(250, 250, 250, 0.1) 1px 2px 4px;
+  box-sizing: border-box;
+  color: #FFFFFF;
   cursor: pointer;
+  display: inline-block;
+  font-family: nunito,roboto,proxima-nova,"proxima nova",sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 14px;
+  min-height: 30px;
+  outline: 0;
+  padding: 12px 14px;
+  text-align: center;
+  text-rendering: geometricprecision;
+  text-transform: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
 }
 
-.thumbtack-messages-pinned {
-  font-size: 10px;
-  padding: 5px 5px;
-  border: 1px solid white;
-  border-radius: 50px;
-  color: white;
-  background-color: black;
+.html__editor__show:hover,
+.html__editor__show:active {
+  background-color: #0099fc;
+  background-position: 0 0;
+  color: #ffffff;
+}
+
+.html__editor__show:active {
+  opacity: .5;
+}
+
+.html__editor__hide {
+  background: #ab0202;
+  border: 1px solid #ab0202;
+  border-radius: 6px;
+  box-shadow: rgba(250, 250, 250, 0.1) 1px 2px 4px;
+  box-sizing: border-box;
+  color: #FFFFFF;
   cursor: pointer;
-}
-
-#pinned-message {
-  position: fixed;
-  z-index:999;
-  background: rgba(0, 0, 0, 0.6);
-  display:flex;
-  align-items:center;
-  width: 22%;
+  display: inline-block;
+  font-family: nunito,roboto,proxima-nova,"proxima nova",sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 14px;
+  min-height: 30px;
+  outline: 0;
+  padding: 12px 14px;
+  text-align: center;
+  text-rendering: geometricprecision;
+  text-transform: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
   display: none;
 }
 
-.pinned {
-  margin: 10px;
+.html__editor__hide:hover,
+.html__editor__hide:active {
+  background-color: #fc0000;
+  background-position: 0 0;
+  color: #ffffff;
+}
+
+.html__editor__hide:active {
+  opacity: .5;
+}
+
+.html__editor__section {
+  visibility: hidden !important;
 }

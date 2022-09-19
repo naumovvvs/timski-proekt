@@ -5,11 +5,8 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Room</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <!-- CSS only -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
     <link rel='stylesheet' type='text/css' media='screen' href='/css/main.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='/css/room.css'>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <style>
         ul.dropdown-menu {
             margin-top: -2px;
@@ -48,6 +45,12 @@
        </div>
 
         <div id="nav__links">
+            <button type="button" class="html__editor__show" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="tinymce.activeEditor.show()">
+                HTML Editor Show
+            </button>
+            <button type="button" class="html__editor__hide" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="tinymce.activeEditor.hide()">
+                HTML Editor Hide
+            </button>
             <button id="chat__button"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" fill="#ede0e0" clip-rule="evenodd"><path d="M24 20h-3v4l-5.333-4h-7.667v-4h2v2h6.333l2.667 2v-2h3v-8.001h-2v-2h4v12.001zm-15.667-6l-5.333 4v-4h-3v-14.001l18 .001v14h-9.667zm-6.333-2h3v2l2.667-2h8.333v-10l-14-.001v10.001z"/></svg></button>
             <a class="nav__link" id="end__room__btn" href="#">
                 End session
@@ -56,7 +59,7 @@
         </div>
     </header>
 
-    <main class="container">
+    <main class="container__main">
         <div id="room__container">
 
             <section id="members__container">
@@ -105,10 +108,6 @@
             </section>
 
             <section id="messages__container">
-                <div id="pinned-message">
-                    <i class="fa-solid fa-thumbtack pinned"></i>
-                    <p class="pin-message-paragraph">Some pinned message adsasdadsasdasdasd asdassdadsa asdsadsadasasd ad</p>
-                </div>
                 <div id="messages">
 
 <!--                    <div class="message__wrapper">-->
@@ -124,15 +123,15 @@
 <!--                            <p class="message__text">Parabellum.</p>-->
 <!--                        </div>-->
 <!--                    </div>-->
+
                 </div>
 
                 <form id="message__form">
-                    <div id="summernote">
-                    </div>
-                    <button type="button" class="btn btn-primary" id="pinMessage">Pin</button>
-                    <input type="text" name="message" placeholder="Send a message...." />
-                </form>
+                    <input type="text" name="message" placeholder="Send a message...." class="classic__message"/>
+                    <div class="html__editor__section" style="display: none">
 
+                    </div>
+                </form>
 
             </section>
         </div>
@@ -149,17 +148,19 @@
     <script type="text/javascript" src="/js/room_rtm.js"></script>
     <script type="text/javascript" src="/js/room_rtc.js"></script>
     <script src="https://cdn.tiny.cloud/1/whpuocgb53rq9dq25pxcx1dqz6i1siose7ydc5weurl0ai4b/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tinymce/tinymce-jquery@2/dist/tinymce-jquery.min.js"></script>
     <script>
         tinymce.init({
-            selector: '#summernote',
+            selector: '.html__editor__section',
             plugins: 'a11ychecker advcode casechange export formatpainter image editimage linkchecker autolink lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tableofcontents tinycomments tinymcespellchecker',
             toolbar: 'a11ycheck addcomment showcomments casechange checklist code export formatpainter image editimage pageembed permanentpen table tableofcontents',
             toolbar_mode: 'floating',
             tinycomments_mode: 'embedded',
             tinycomments_author: 'Author name',
             menubar: false,
-            comments: false
+            comments: false,
+            skin: "oxide-dark",
+            content_css: "dark"
         });
+        tinymce.activeEditor.hide();
     </script>
 </html>
