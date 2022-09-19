@@ -1,16 +1,16 @@
-if(localStorage.getItem("accessToken") === null){
+if (localStorage.getItem("accessToken") === null) {
     $("#login").removeClass("d-none");
     $("#logout").addClass("d-none");
     $("#loggedUserName").addClass("d-none");
     $("#notLogged").removeClass("d-none");
-}else{
+} else {
     $("#login").addClass("d-none");
     $("#logout").removeClass("d-none");
     $("#notLogged").addClass("d-none");
     $("#loggedUserName").removeClass("d-none");
 }
 
-$("#logout").on("click", function(){
+$("#logout").on("click", function () {
     window.localStorage.clear();
     window.location.reload();
 });
@@ -29,7 +29,7 @@ $.ajax({
     },
     success: function (response) {
         loggedInUserId = response.id;
-        if(response.roles[0].name === "ROLE_PROFESSOR"){
+        if (response.roles[0].name === "ROLE_PROFESSOR") {
             isModerator = true;
         }
         $("#loggedUserName").append(response.username);
@@ -40,7 +40,7 @@ $.ajax({
     }
 });
 
-if(!isModerator) {
+if (!isModerator) {
     $("#createRoom").css("display", "none");
     $("#addStudents").css("display", "none");
 }
@@ -71,9 +71,19 @@ $.ajax({
             success: function (response) {
                 let roomContent = $(".room-container");
                 response.forEach((element) => {
-                    let card = `<div class="d-flex align-items-center my-3"><img src="https://ispiti.finki.ukim.mk/theme/image.php/classic/bigbluebuttonbn/1637703842/icon">
-                    <p class="text-primary mx-2 my-0"><a href="http://localhost:8080/room?room=${element.id}&student=${loggedInUserId}&isProfessor=${isModerator}" style="text-decoration: none;">${element.name}</a></p></div>`
-                    roomContent.append(card);
+                    let reportBtn = "";
+                    let card = `<div class="d-flex align-items-center my-3">
+                                    <img src="https://ispiti.finki.ukim.mk/theme/image.php/classic/bigbluebuttonbn/1637703842/icon">
+                                       <p class="text-primary mx-2 my-0">
+                                        <a href="http://localhost:8080/room?room=${element.id}&student=${loggedInUserId}&isProfessor=${isModerator}" style="text-decoration: none;">${element.name}
+                                        </a>
+                                       </p>`
+                    if (isModerator) {
+                        reportBtn = `<a class="btn btn-sm btn-success" href="/report/${element.id}" target="_blank">Room report</a>`
+                    }
+                    `</div>`
+                    let cardFinal = card + reportBtn;
+                    roomContent.append(cardFinal);
                 });
             }
         });
@@ -81,12 +91,12 @@ $.ajax({
 });
 
 // Add new room with allowed students (as checked previously)
-$("#saveRoom").on("click", function(){
+$("#saveRoom").on("click", function () {
     let roomName = $("#roomName").val();
     let dateStart = $("#dateStart").val();
     let dateEnd = $("#dateEnd").val();
     let allowedStudents = [];
-    $(".allowed__students input:checkbox[name=studentIndex]:checked").each(function(){
+    $(".allowed__students input:checkbox[name=studentIndex]:checked").each(function () {
         allowedStudents.push($(this).attr("id"));
     });
     //console.log(allowedStudents)
@@ -155,7 +165,7 @@ $("#createRoom").on("click", function () {
             console.error(rs.responseText);
         }
     });
-})
+});
 
 // Get all students, not enrolled in the course with {@courseCode} (in order to show them as a checkbox-list)
 $("#addStudents").on("click", function () {
@@ -195,7 +205,7 @@ $("#addStudents").on("click", function () {
 $("#addStudentsToCourse").on("click", function () {
     // get checked students
     let checkedStudents = [];
-    $(".all__students input:checkbox[name=studentIndex]:checked").each(function(){
+    $(".all__students input:checkbox[name=studentIndex]:checked").each(function () {
         checkedStudents.push($(this).attr("id"));
     });
     let dtoData = {
