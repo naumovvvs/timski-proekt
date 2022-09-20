@@ -146,6 +146,12 @@ let handleChannelMessage = async (messData, memberId) => {
         await changeUserStatus(data.new_status, data.user);
     } else if (data.type === 'session_end') {
         await addBotMessageToDom(data.message);
+    } else if (data.type === 'block-user') {
+        if(data.user == currentLoggedInUser.id) {
+            console.log("BLOCKED USER TEST");
+            alert("You have been blocked by the moderator! Close this to redirect...");
+            window.location.href="/subject";
+        }
     }
 }
 

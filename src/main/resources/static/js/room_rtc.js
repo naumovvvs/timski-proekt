@@ -746,8 +746,14 @@ let changeStudentStatus = async (e) => {
     });
 
     if (isBlocked) {
-        alert("You have been blocked from the moderator! Close this to redirect.")
-        window.location.href="/subject";
+        // send message for blocked user to be kicked out
+        channel.sendMessage({
+            text: JSON.stringify({
+                'type': 'block-user',
+                'message': "Blocked user with id: " + studentId,
+                'user': studentId
+            })
+        });
     }
 }
 
