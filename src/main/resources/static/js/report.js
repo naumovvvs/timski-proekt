@@ -11,6 +11,8 @@ if (localStorage.getItem("accessToken") === null) {
 }
 
 let isModerator = false;
+let currentLoggedInUser;
+let currentLoggedInUserRole;
 
 // get current logged-in user
 $.ajax({
@@ -22,7 +24,8 @@ $.ajax({
     },
     success: function (response) {
         currentLoggedInUser = response;
-        if (response.roles[0].name === "ROLE_PROFESSOR") {
+        currentLoggedInUserRole = response.roles[0].name;
+        if (currentLoggedInUserRole === "ROLE_PROFESSOR" || currentLoggedInUserRole === "ROLE_ADMIN") {
             isModerator = true;
         }
     },

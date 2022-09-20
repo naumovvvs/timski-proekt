@@ -3,6 +3,7 @@ package mk.ukim.finki.timskiproekt;
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.Role;
 import mk.ukim.finki.timskiproekt.model.Room;
+import mk.ukim.finki.timskiproekt.model.Student;
 import mk.ukim.finki.timskiproekt.model.dto.*;
 import mk.ukim.finki.timskiproekt.model.enums.Semester;
 import mk.ukim.finki.timskiproekt.service.CourseService;
@@ -64,14 +65,14 @@ public class TimskiProektApplication {
             courseService.createCourse(new CourseDTO(1L, "Веб дизајн", "WD001", "https://99designs-blog.imgix.net/blog/wp-content/uploads/2018/09/WHAT-IS-WEB-DESIGN.jpg?auto=format&q=60&w=1860&h=1395&fit=crop&crop=faces", Semester.SUMMER));
 
             //studentService.addCourseToStudent(km, 3L);
-            //studentService.addCourseToStudent(km, 2L);
+            studentService.addCourseToStudent(km, 2L);
 
             Room s1 = roomService.create(new SaveRoomDto("Испит - Компјутерски Мрежи", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L, new ArrayList<>()));
             Room s2 = roomService.create(new SaveRoomDto("Предавања", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L, new ArrayList<>()));
             // test allowed users condition
-            //List<Student> allowed = new ArrayList<>();
-            //allowed.add((Student) userService.getUser("ognj"));
-            Room test = roomService.create(new SaveRoomDto("Колоквиум (тест)", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L, new ArrayList<>()));
+            List<Student> allowed = new ArrayList<>();
+            allowed.add((Student) userService.getUser("ognj"));
+            Room test = roomService.create(new SaveRoomDto("Колоквиум (тест)", LocalDateTime.now(), LocalDateTime.of(2022, Month.JULY, 25, 17, 40), 1L, 4L, new ArrayList<>()), allowed);
 
             courseService.addRoomToCourse(test, "KM001");
             courseService.addRoomToCourse(s1, "KM001");

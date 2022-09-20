@@ -2,6 +2,7 @@ package mk.ukim.finki.timskiproekt.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import mk.ukim.finki.timskiproekt.model.AppUser;
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.Professor;
 import mk.ukim.finki.timskiproekt.repository.CourseRepository;
@@ -10,6 +11,7 @@ import mk.ukim.finki.timskiproekt.service.ProfessorService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -44,5 +46,12 @@ public class ProfessorServiceImpl implements ProfessorService {
 
         log.info("Assigning course with code: {}, to professor with id: {}", courseCode, professorId);
         return this.professorRepository.save(prof);
+    }
+
+    @Override
+    public List<AppUser> findAll() {
+        return this.professorRepository.findAll().stream()
+                .filter(p -> p.getRoles().get(0).getName().equals("ROLE_PROFESSOR"))
+                .collect(Collectors.toList());
     }
 }

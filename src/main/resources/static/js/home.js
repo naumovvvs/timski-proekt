@@ -10,7 +10,8 @@ if(localStorage.getItem("accessToken") === null){
     $("#loggedUserName").removeClass("d-none");
 }
 
-let userId = null;
+let professorId = null;
+let isAdmin = false;
 
 if(localStorage.getItem("accessToken") === null) {
     $.ajax({
@@ -43,17 +44,24 @@ if(localStorage.getItem("accessToken") === null) {
         },
         success: function (response) {
             let url;
-            if(response.roles[0].name == "ROLE_PROFESSOR") {
+            let userRole = response.roles[0].name;
+            if (userRole === "ROLE_ADMIN") {
+                $("#addCourse").removeClass("d-none");
+                url = "/api/course/all-courses/";
+                isAdmin = true;
+            }
+            else if(userRole === "ROLE_PROFESSOR") {
                 $("#addCourse").removeClass("d-none");
                 url = "/api/professor/all-courses/";
-                userId = response.id;
-            } else{
+                professorId = response.id;
+            }
+            else {
                 $("#addCourse").addClass("d-none");
-                url = "/api/student/all-courses/"
+                url = "/api/student/all-courses/";
             }
             $.ajax({
                 type: "GET",
-                url: url + response.id,
+                url: isAdmin ? url : url + response.id,
                 async: false,
                 headers: {
                     "Authorization":
@@ -109,7 +117,16 @@ $("#saveCourse").on("click", function(){
                 "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
         },
         success: function (data) {
-            addCourseToProfessor(data);
+            if (professorId !== null) {
+                addCourseToProfessor(data, professorId);
+            } else {
+                if (isAdmin) {
+                    // assign the course to the checked professors
+                    $(".professors input:checkbox[name=profId]:checked").each(function () {
+                        addCourseToProfessor(data, $(this).attr("id"));
+                    });
+                }
+            }
         },
         error: function (rs) {
             console.error(rs.status);
@@ -118,10 +135,10 @@ $("#saveCourse").on("click", function(){
     });
 });
 
-let addCourseToProfessor = (course) => {
+let addCourseToProfessor = (course, moderator) => {
     let courseToProfessor = {
         courseName: course.name,
-        userId: userId
+        userId: moderator
     }
 
     $.ajax({
@@ -147,3 +164,42 @@ let addCourseToProfessor = (course) => {
         }
     });
 }
+
+// Get all professors (in order to show them as a checkbox-list)
+$("#addCourse").on("click", function () {
+    if (isAdmin) {
+        $(".professors").html("").parent().removeClass("d-none");
+
+        $.ajax({
+            type: "GET",
+            url: "/api/professor",
+            async: false,
+            headers: {
+                "Authorization":
+                    "Bearer " + JSON.parse(window.localStorage.getItem('accessToken')),
+            },
+            success: function (data, response) {
+                console.log(data);
+                console.log(response);
+
+                // add the professors to the checkbox-list
+                for (let i = 0; i < data.length; i++) {
+                    let checkboxProfessor = `<li class="list-group-item">
+                                            <input type="checkbox" name="profId" class="custom-control-input" id="${data[i].id}">
+                                            <label class="custom-control-label" for="${data[i].id}">
+                                                ${data[i].name}
+                                            </label>
+                                       </li>`;
+                    $(".professors").append(checkboxProfessor);
+                }
+            },
+            error: function (rs) {
+                console.error(rs.status);
+                console.error(rs.responseText);
+            }
+        });
+    }
+});
+
+// Initially hide the professors checkbox-list
+$(".professors").parent().addClass("d-none");

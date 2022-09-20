@@ -37,7 +37,7 @@ public interface RoomService {
     Room create(SaveRoomDto roomDto);
 
     // TODO: only for testing purposes (delete later)
-    //Room create(SaveRoomDto roomDto, List<Student> allowed);
+    Room create(SaveRoomDto roomDto, List<Student> allowed);
 
     Room update(Long id, EditRoomDto roomDto);
 

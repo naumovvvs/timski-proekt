@@ -1,5 +1,6 @@
 package mk.ukim.finki.timskiproekt.service;
 
+import mk.ukim.finki.timskiproekt.model.AppUser;
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.Professor;
 
@@ -11,4 +12,6 @@ public interface ProfessorService {
     List<Course> getAllCoursesForProfessor(Long professorId);
 
     Professor addCourseToProfessor(String courseCode, Long professorId);
+
+    List<AppUser> findAll();
 }

@@ -128,19 +128,19 @@ public class RoomServiceImpl implements RoomService {
     }
 
     // TODO: only for testing purposes (delete later) (maybe useful because of allowed students?)
-//    @Override
-//    public Room create(SaveRoomDto roomDto, List<Student> allowed) {
-//        Course course = this.courseRepository.findById(roomDto.getCourseId())
-//                .orElseThrow(() -> new RuntimeException(String.format("Course with id: %d not found!", roomDto.getCourseId())));
-//        Professor moderator = (Professor) this.professorRepository.findById(roomDto.getModeratorId())
-//                .orElseThrow(() -> new RuntimeException(String.format("Moderator with id: %d not found!", roomDto.getModeratorId())));
-//
-//        Chat chat = new Chat();
-//        this.chatRepository.save(chat);
-//        Room room = new Room(roomDto.getName(), roomDto.getOpenFrom(), roomDto.getOpenTo(), course, moderator, chat, allowed);
-//        log.info("Creating room for course with id: {}, by moderator with id: {}", roomDto.getCourseId(), roomDto.getModeratorId());
-//        return this.roomRepository.save(room);
-//    }
+    @Override
+    public Room create(SaveRoomDto roomDto, List<Student> allowed) {
+        Course course = this.courseRepository.findById(roomDto.getCourseId())
+                .orElseThrow(() -> new RuntimeException(String.format("Course with id: %d not found!", roomDto.getCourseId())));
+        Professor moderator = (Professor) this.professorRepository.findById(roomDto.getModeratorId())
+                .orElseThrow(() -> new RuntimeException(String.format("Moderator with id: %d not found!", roomDto.getModeratorId())));
+
+        Chat chat = new Chat();
+        this.chatRepository.save(chat);
+        Room room = new Room(roomDto.getName(), roomDto.getOpenFrom(), roomDto.getOpenTo(), course, moderator, chat, allowed);
+        log.info("Creating room for course with id: {}, by moderator with id: {}", roomDto.getCourseId(), roomDto.getModeratorId());
+        return this.roomRepository.save(room);
+    }
 
     @Override
     public Room update(Long id, EditRoomDto roomDto) {

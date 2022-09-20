@@ -1,6 +1,7 @@
 package mk.ukim.finki.timskiproekt.web.api;
 
 import lombok.AllArgsConstructor;
+import mk.ukim.finki.timskiproekt.model.AppUser;
 import mk.ukim.finki.timskiproekt.model.Course;
 import mk.ukim.finki.timskiproekt.model.dto.CourseDTO;
 import mk.ukim.finki.timskiproekt.model.dto.CourseToUserDTO;
@@ -23,6 +24,11 @@ public class ProfessorRestController {
     private final ProfessorService professorService;
     private final CourseService courseService;
     private final ModelMapper modelMapper;
+
+    @GetMapping
+    public List<AppUser> getAllProfessors() {
+        return professorService.findAll();
+    }
 
     @GetMapping("/all-courses/{professorId}")
     public ResponseEntity<List<CourseDTO>> getAllCoursesForProfessor(@PathVariable Long professorId) {
