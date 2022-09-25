@@ -151,6 +151,8 @@ let handleChannelMessage = async (messData, memberId) => {
             alert("You have been blocked by the moderator! Close this to redirect...");
             window.location.href="/subject";
         }
+    } else if (data.type === 'pin-message') {
+        await remotePinMessage(data.message);
     }
 }
 
@@ -212,13 +214,27 @@ let changeUserStatus = async (newStatus, userId) => {
 let addMessageToDom = async (name, message, sender) => {
     let messagesWrapper = document.getElementById('messages');
 
-    // create new message element
+    // default message without pin button
     let newMessage = `<div class="message__wrapper">
                         <div class="message__body">
                             <strong class="message__author">${name}</strong>
-                            <p class="message__text">${message}</p>
+                            <div class="message__text">${message}</div>
                         </div>
                     </div>`;
+
+    // if the user is a professor, only then show pin button
+    // for students show standard messages
+    if (currentLoggedInStudent === "") {
+        newMessage = `<div class="message__wrapper">
+                        <div class="message__body">
+                            <strong class="message__author">${name}</strong>
+                            <div class="message__text">${message}</div>
+                        </div>
+                        <div class="pin-message" onclick="pinMessage(this)">
+                            <i class="fa-solid fa-thumbtack thumbtack-messages"></i>
+                        </div>
+                    </div>`;
+    }
 
     // add new message to the HTML DOM
     messagesWrapper.insertAdjacentHTML('beforeend', newMessage);
@@ -228,6 +244,36 @@ let addMessageToDom = async (name, message, sender) => {
     if (lastMessage) {
         lastMessage.scrollIntoView();
     }
+}
+
+// pin the same message from professor chat on remote user chat
+let remotePinMessage = async (pinMessage) => {
+    // display pinned message in chat
+    $(".thumbtack-messages").removeClass("thumbtack-messages-pinned");
+    $("#pinned-message").css("display", "flex");
+    $(".pin-message-paragraph").html(pinMessage);
+    let clientHeight = document.getElementById('pinned-message').clientHeight;
+    $("#messages").css("margin-top", clientHeight);
+}
+
+// show pinned message on top of chat
+let pinMessage = async (e) => {
+    console.log("PINNING MESSAGE");
+    let pinMessage = e.parentElement.children[0].children[1].innerHTML;
+
+    $(".thumbtack-messages").removeClass("thumbtack-messages-pinned");
+    $("#pinned-message").css("display", "flex");
+    $(".pin-message-paragraph").html(pinMessage);
+    let clientHeight = document.getElementById('pinned-message').clientHeight;
+    $("#messages").css("margin-top", clientHeight);
+
+    // send notification to remote users for new pinned message
+    channel.sendMessage({
+        text: JSON.stringify({
+            'type': 'pin-message',
+            'message': pinMessage
+        })
+    });
 }
 
 let addBotMessageToDom = async (botMessage) => {

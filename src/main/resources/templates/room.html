@@ -5,8 +5,11 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Timski - Room</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
     <link rel='stylesheet' type='text/css' media='screen' href='/css/main.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='/css/room.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <style>
         ul.dropdown-menu {
             margin-top: -2px;
@@ -108,6 +111,10 @@
             </section>
 
             <section id="messages__container">
+                <div id="pinned-message">
+                    <i class="fa-solid fa-thumbtack pinned"></i>
+                    <div class="pin-message-paragraph">Some pinned message</div>
+                </div>
                 <div id="messages">
 
 <!--                    <div class="message__wrapper">-->
