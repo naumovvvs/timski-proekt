@@ -89,7 +89,6 @@ const agoraDTO = {
     "roomId": roomId,
     "userId": uid
 };
-
 // generate the RTC token used for AgoraRTC authentication
 $.ajax({
     type: "POST",
@@ -248,10 +247,7 @@ let joinRoomInit = async () => {
     await addBotMessageToDom(`Welcome to the room ${currentLoggedInUser.name}! 👋`)
 
     // create the AgoraRTC client
-    client = AgoraRTC.createClient({
-        mode: 'rtc',
-        codec: 'vp8'
-    });
+    client = AgoraRTC.createClient({mode: 'rtc', codec: 'vp8'});
 
     // join a specific room
     await client.join(APP_ID, roomId, rtcToken, uid);
@@ -271,7 +267,6 @@ let joinRoomInit = async () => {
 
     // check if this is the start of the room
     let members = await channel.getMembers();
-    // console.log(members.length)
     if (members.length === 1) {
         // start this room
         $.ajax({
@@ -314,6 +309,7 @@ let createStudentInRoomRelationship = async () => {
     }
 }
 
+// handles LOCAL video stream
 let joinVideoStream = async () => {
     // create local track for video
     localTracks[1] = await AgoraRTC.createCameraVideoTrack({encoderConfig: {
@@ -327,14 +323,29 @@ let joinVideoStream = async () => {
         el.remove();
     }
 
-    let player = `<div class="video__container" id="user-container-${uid}">
+    // default value for player, if there is screen share then modify player
+    let player = `<div class="camera_video_container" id="user-container-${uid}">
                         <div class="video-player" id="user-${uid}"></div>
                   </div>`;
 
-    // add video player for current user to the DOM
-    document.getElementById('unidentified__container').insertAdjacentHTML('beforeend', player);
-    // event listener for when user clicks, expand the video to presenter mode (full screen)
-    document.getElementById(`user-container-${uid}`).addEventListener('click', expandVideoFrame);
+    // helper id variable
+    let pomId = uid*10000;
+    let screenPlayer = document.getElementById(`user-container-${pomId}-screen`);
+
+    if(screenPlayer!=null) {
+        // if there is screen share, append the camera to the screen share container
+        player = `<div class="camera_video_container" id="user-container-${uid}" style="position: absolute; 
+                            height: 90px; width: 170px; top: 65%; left: 65%;">
+                    <div class="video-player" id="user-${uid}"></div>
+                  </div>`;
+        screenPlayer.insertAdjacentHTML('beforeend', player);
+    } else {
+        // if user hasn't shared screen, then create camera video stream only
+        // add video player for current user to the DOM
+        document.getElementById('unidentified__container').insertAdjacentHTML('beforeend', player);
+        // event listener for when user clicks, expand the video to presenter mode (full screen)
+        document.getElementById(`user-container-${uid}`).addEventListener('click', expandVideoFrame);
+    }
 
     // [0]-audio track, [1]-video track
     await localTracks[1].setEnabled(true);
@@ -352,6 +363,7 @@ let joinAudioStream = async () => {
     await client.publish([localTracks[0]]);
 }
 
+// Handles REMOTE camera stream (not screen share)
 let handleUserPublished = async (user, mediaType) => {
     if(user.uid === currentLoggedInUser.id) {
         return;
@@ -368,25 +380,79 @@ let handleUserPublished = async (user, mediaType) => {
     // subscribe to current user's stream
     await client.subscribe(user, mediaType);
 
-    // get player for user (check if already exists)
-    let player = document.getElementById(`user-container-${user.uid}`);
+    let pomUserId = user.uid * 10000;
+    let screenPlayer = document.getElementById(`user-container-${pomUserId}-screen`);
 
-    // if the player is not present, then we create it (check for avoiding duplicated)
-    if(player == null) {
-        player = `<div class="video__container" id="user-container-${user.uid}">
-                        <div class="video-player" id="user-${user.uid}"></div>
+    if(screenPlayer != null) {
+        // if the user has screen share already published, then append camera to the screen share container
+        // Check if camera container is present, and remove it because we need to create it again
+        let cameraPlayer = document.getElementById(`user-container-${user.uid}`);
+        if(cameraPlayer!=null) {
+            cameraPlayer.remove();
+        }
+
+        // default values for camera container
+        let ht = "90px";
+        let wt = "170px";
+
+        // if the user currently sharing in stream box is the same user with the camera,
+        // then make the camera container bigger
+        if(userIdInDisplayFrame === screenPlayer.id) {
+            ht = "180px";
+            wt = "300px";
+        }
+
+        let player = `<div class="camera_video_container" id="user-container-${user.uid}" style="position: absolute; 
+                            height: ${ht}; width: ${wt}; top: 65%; left: 65%;">
+                    <div class="video-player" id="user-${user.uid}"></div>
                   </div>`;
 
-        // add player to the DOM
-        document.getElementById('unidentified__container').insertAdjacentHTML('beforeend', player);
-        document.getElementById(`user-container-${user.uid}`).addEventListener('click', expandVideoFrame);
+        screenPlayer.insertAdjacentHTML('beforeend', player);
+    } else {
+        // if user hasn't shared screen, then show camera only with normal dimensions
+        // get camera player for user (check if already exists)
+        let cameraPlayer = document.getElementById(`user-container-${user.uid}`);
+
+        // if the camera player is not present, then we create it (check for avoiding duplicated)
+        if (cameraPlayer == null) {
+            let player = `<div class="camera_video_container" id="user-container-${user.uid}">
+                    <div class="video-player" id="user-${user.uid}"></div>
+                  </div>`;
+
+            // add player to the DOM
+            document.getElementById('unidentified__container').insertAdjacentHTML('beforeend', player);
+            document.getElementById(`user-container-${user.uid}`).addEventListener('click', expandVideoFrame);
+        }
     }
 
-    // when a new user joins, if we are displaying someone set the new user to 100px right away
+    // when a new user joins, if we are displaying someone set the new user as smaller right away
     if(displayFrame.style.display) {
-        let videoFrame = document.getElementById(`user-container-${user.uid}`);
-        videoFrame.style.height = '100px';
-        videoFrame.style.width = '100px';
+        // check for screen share container
+        let pomId = user.uid*10000;
+        let videoFrame = document.getElementById(`user-container-${pomId}-screen`);
+
+        // false means screen share container is not present
+        let screenShareFlag = false;
+
+        if(videoFrame!=null){
+            // change flag to true because screen share container is present
+            screenShareFlag = true;
+            videoFrame.style.height = '180px';
+            videoFrame.style.width = '300px';
+        }
+
+        // check for camera container
+        let cameraFrame = document.getElementById(`user-container-${user.uid}`);
+        if(cameraFrame!=null) {
+            // if screen share is present the make camera small (in the corner), else make it normal size
+            if(screenShareFlag){
+                cameraFrame.style.height = '90px';
+                cameraFrame.style.height = '170px';
+            } else {
+                cameraFrame.style.height = '180px';
+                cameraFrame.style.height = '300px';
+            }
+        }
     }
 
     if(mediaType === 'video'){
@@ -408,6 +474,7 @@ let handleUserUnpublished = async (user, mediaType) => {
     }
 
     console.log("Unsubscribe from user: " + user.uid + ", media type: " + mediaType);
+
     await client.unsubscribe(user,mediaType);
 }
 
@@ -435,7 +502,13 @@ let handleUserLeft = async (user) => {
         let videoFrames = document.getElementsByClassName('video__container');
         for(let i=0; i<videoFrames.length; i++) {
             videoFrames[i].style.height = "300px";
-            videoFrames[i].style.width = "300px";
+            videoFrames[i].style.width = "500px";
+        }
+
+        let cameraFrames = document.getElementsByClassName('camera_video_container');
+        for(let i=0; i<cameraFrames.length; i++) {
+            cameraFrames[i].style.height = "180px";
+            cameraFrames[i].style.width = "300px";
         }
     }
 
@@ -473,11 +546,10 @@ let handleUserPublishedScreen = async(user, mediaType) => {
     await screenClient.subscribe(user, mediaType);
 
     // get player for user (check if already exists)
-    let player = document.getElementById(`user-container-${user.uid}-screen`);
-
+    let screenPlayer = document.getElementById(`user-container-${user.uid}-screen`);
     // if the player is not present, then we create it (check for avoiding duplicated)
-    if(player == null) {
-        player = `<div class="video__container" id="user-container-${user.uid}-screen">
+    if(screenPlayer == null) {
+        let player = `<div class="video__container" id="user-container-${user.uid}-screen" style="position: relative">
                         <div class="video-player" id="user-${user.uid}-screen"></div>
                   </div>`;
 
@@ -486,15 +558,48 @@ let handleUserPublishedScreen = async(user, mediaType) => {
         document.getElementById(`user-container-${user.uid}-screen`).addEventListener('click', expandVideoFrame);
     }
 
-    // when a new user joins, if we are displaying someone set the new user to 100px right away
+    let pomId = user.uid/10000;
+    let cameraPlayer = document.getElementById(`user-container-${pomId}`);
+
+    // false because camera share is not present else true
+    let cameraFlag = false;
+    // if camera div already exists then remove it and append it to the screen share container
+    if(cameraPlayer!=null) {
+        cameraFlag = true;
+        // remove existing container
+        cameraPlayer.remove();
+        // create again
+        let cameraDiv = `<div class="camera_video_container" id="user-container-${pomId}" style="position: absolute; 
+                            height: 90px!important; width: 170px!important; top: 65%; left: 65%;">
+                            <div class="video-player" id="user-${pomId}"></div>
+                        </div>`;
+        // append to screen share
+        let screenPlayer = document.getElementById(`user-container-${user.uid}-screen`);
+        screenPlayer.insertAdjacentHTML('beforeend', cameraDiv);
+    }
+
+    // when a new user joins, if we are displaying someone set the new user to smaller size right away
     if(displayFrame.style.display) {
         let videoFrame = document.getElementById(`user-container-${user.uid}-screen`);
-        videoFrame.style.height = '100px';
-        videoFrame.style.width = '100px';
+        videoFrame.style.height = '180px';
+        videoFrame.style.width = '300px';
+        if(cameraFlag) {
+            let cameraFrame = document.getElementById(`user-container-${pomId}`);
+            if(cameraFrame!=null) {
+                cameraFrame.style.height = '90px';
+                cameraFrame.style.width = '170px';
+            }
+        }
     }
+
+    // get camera user (user's camera video track) from list of remote users
+    let cameraUser = remoteUsers[pomId];
 
     if(mediaType === 'video'){
         user.videoTrack.play(`user-${user.uid}-screen`);
+        if(cameraUser != null) {
+            cameraUser.videoTrack.play(`user-${pomId}`);
+        }
     }
 
     if(mediaType === 'audio'){
@@ -509,6 +614,15 @@ let handleUserUnpublishedScreen = async(user, mediaType) => {
 
     if(user.uid % 10000 !== 0) {
         return;
+    }
+
+    // before removing screen container, check if camera container is present
+    let pomId = user.uid/10000;
+    let cameraDiv = document.getElementById(`user-container-${pomId}`);
+
+    // if camera is present (user shared both camera and screen), remove camera container first then screen container
+    if(cameraDiv!=null) {
+        cameraDiv.remove();
     }
 
     // remove current video track (camera) from user's video container
@@ -550,15 +664,14 @@ let toggleMic = async (e) => {
     }
 }
 
-let toggleCamera = async (e) => {
-    let button = e.currentTarget;
+let toggleCamera = async () => {
+    let button = document.getElementById("camera-btn");
 
     // check if this is the first time turning on the camera
     // if yes, create camera video stream
     if(localTracks[1] === undefined) {
         await joinVideoStream();
-        button.classList.add('active');
-        return;
+        await localTracks[1].setEnabled(false);
     }
 
     // check if camera is turned off
@@ -577,8 +690,12 @@ let toggleCamera = async (e) => {
     }
 }
 
+// Handles LOCAL screen stream
 let toggleScreen = async (e) => {
     let screenButton = e.currentTarget;
+    let cameraButton = document.getElementById('camera-btn');
+    // multiply by 10000, to make local streams consistent with remote streams
+    let pomId = uid*10000;
 
     // turn off camera, turn on screen sharing
     if(!sharingScreen) {
@@ -589,42 +706,91 @@ let toggleScreen = async (e) => {
         // create video track for screen share
         localScreenTracks = await AgoraRTC.createScreenVideoTrack();
 
-        // share screen
-        displayFrame.style.display = 'block';
-
         // create a new player for screen share
-        let player = `<div class="video__container" id="user-container-${uid}-screen">
-                        <div class="video-player" id="user-${uid}-screen"></div>
+        let player = `<div class="video__container" id="user-container-${pomId}-screen" style="position: relative">
+                        <div class="video-player" id="user-${pomId}-screen"></div>
                   </div>`;
-        // add player to HTML
+        // add player to HTML (presenter)
         displayFrame.insertAdjacentHTML('beforeend', player);
-        // make it clickable (expands on click)
-        document.getElementById(`user-container-${uid}-screen`).addEventListener('click', expandVideoFrame);
 
-        userIdInDisplayFrame = `user-container-${uid}-screen`;
-        localScreenTracks.play(`user-${uid}-screen`);
+        localScreenTracks.play(`user-${pomId}-screen`);
 
         // publish screen share video
         await screenClient.publish([localScreenTracks]);
+
+        let cameraPlayer = document.getElementById(`user-container-${uid}`);
+
+        // if camera div already exists then remove it and append it to the screen share container
+        if(cameraPlayer!=null) {
+            cameraButton.classList.add('active');
+            // stop local playback
+            await localTracks[1].stop();
+            // un-publish camera track
+            await client.unpublish([localTracks[1]]);
+            // remove existing container
+            cameraPlayer.remove();
+
+            // create again
+            let cameraDiv = `<div class="camera_video_container" id="user-container-${uid}" style="position: absolute; 
+                            height: 180px!important; width: 300px!important; top: 65%; left: 65%;">
+                            <div class="video-player" id="user-${uid}"></div>
+                        </div>`;
+
+            // append to screen share
+            let screenPlayer = document.getElementById(`user-container-${pomId}-screen`);
+            screenPlayer.insertAdjacentHTML('beforeend', cameraDiv);
+
+            // [0]-audio track, [1]-video track
+            await localTracks[1].setEnabled(true);
+            await localTracks[1].play(`user-${uid}`);
+            // publish camera track
+            await client.publish([localTracks[1]]);
+        }
+
+        // presenter screen
+        displayFrame.style.display = 'block';
+        // make it clickable (expands on click)
+        document.getElementById(`user-container-${pomId}-screen`).addEventListener('click', expandVideoFrame);
+        // save presenter id
+        userIdInDisplayFrame = `user-container-${pomId}-screen`;
 
         // set other participants video stream boxes to 100px (because someone is sharing)
         let videoFrames = document.getElementsByClassName('video__container');
         for (let i=0; i<videoFrames.length; i++) {
             if(videoFrames[i].id !== userIdInDisplayFrame) {
-                videoFrames[i].style.height = '100px';
-                videoFrames[i].style.width = '100px';
+                videoFrames[i].style.height = '180px';
+                videoFrames[i].style.width = '300px';
+            }
+        }
+
+        let cameraFrames = document.getElementsByClassName('camera_video_container');
+        for(let i=0; i<cameraFrames.length; i++) {
+            if(cameraFrames[i].id !== ("user-container-"+uid)) {
+                cameraFrames[i].style.height = "90px";
+                cameraFrames[i].style.width = "170px";
             }
         }
     } else {
         sharingScreen = false;
 
-        //cameraButton.style.display = 'block';
+        let cameraPlayer = document.getElementById(`user-container-${uid}`);
+        if(cameraPlayer!=null) {
+            cameraPlayer.remove();
+            // active to false, stop playback and enabled->false
+            await toggleCamera();
+            // un-publish camera track
+            await client.unpublish([localTracks[1]]);
+            // delete local camera track (to be created again)
+            localTracks.splice(1,1);
+        }
+
         screenButton.classList.remove('active');
 
         // remove current video track (screen share track)
-        document.getElementById(`user-container-${uid}-screen`).remove();
+        document.getElementById(`user-container-${pomId}-screen`).remove();
         // un-publish current screen share video track
         await screenClient.unpublish([localScreenTracks]);
+
         displayFrame.style.display = 'none';
 
         // set participants video stream boxes to 300px (because someone stopped screen sharing)
@@ -632,8 +798,14 @@ let toggleScreen = async (e) => {
         for (let i=0; i<videoFrames.length; i++) {
             if(videoFrames[i].id !== userIdInDisplayFrame) {
                 videoFrames[i].style.height = '300px';
-                videoFrames[i].style.width = '300px';
+                videoFrames[i].style.width = '500px';
             }
+        }
+
+        let cameraFrames = document.getElementsByClassName('camera_video_container');
+        for(let i=0; i<cameraFrames.length; i++) {
+            cameraFrames[i].style.height = "90px";
+            cameraFrames[i].style.width = "170px";
         }
     }
 }
@@ -715,6 +887,7 @@ let changeStudentStatus = async (e) => {
     // console.log(dtoData)
     let url = "/api/room/edit-student-status/" + roomId;
 
+    // call to change student status
     $.ajax({
         url: url,
         type: "POST",
@@ -728,9 +901,10 @@ let changeStudentStatus = async (e) => {
             console.log(data);
             let span = e.target.parentElement.parentElement.previousElementSibling.previousElementSibling;
             let userID = e.target.parentElement.parentElement.parentElement.getAttribute('id').match((/(\d+)/))[0];
-            console.log(userID);
+
             let userContainer = document.getElementById("user-container-" + userID);
             userContainer.style.borderColor = newBorderClass;
+
             // change user-container position based on the new status
             let parentElem = userContainer.parentElement;
             parentElem.removeChild(userContainer);
@@ -769,7 +943,3 @@ $(function () {
 });
 
 joinRoomInit();
-
-
-
-

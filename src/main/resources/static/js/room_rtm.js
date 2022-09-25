@@ -148,13 +148,13 @@ let handleChannelMessage = async (messData, memberId) => {
         await addBotMessageToDom(data.message);
     } else if (data.type === 'block-user') {
         if(data.user == currentLoggedInUser.id) {
-            console.log("BLOCKED USER TEST");
             alert("You have been blocked by the moderator! Close this to redirect...");
             window.location.href="/subject";
         }
     }
 }
 
+// returns room summary in alert box
 let getRoomInfo = async (userId, roomId) => {
     let url = "/api/room/end/" + roomId + "/room-summary/" + userId;
     let room = null;
@@ -276,7 +276,15 @@ let sendRoomHasEndedMessage = async () => {
     window.location.href = "/subject";
 }
 
-let sendToggleAllMicrophonesMessage = async (e) => {
+let sendToggleAllMicrophonesMessage = async () => {
+    let tgAllBtn = document.getElementById("admin-mic-btn");
+
+    if(tgAllBtn.classList.contains("active")) {
+        tgAllBtn.classList.remove("active");
+    } else {
+        tgAllBtn.classList.add("active");
+    }
+
     channel.sendMessage({
         text: JSON.stringify({
             'type': 'microphoneToggle',
@@ -378,12 +386,25 @@ let sendEditedMessage = async (message) => {
 }
 
 let leaveChannel = async () => {
+    console.log("LEAVING CHANNEL");
     await channel.leave();
     await rtmClient.logout();
+    // leave rooms for client and screenClient
+    await client.leave();
+    await screenClient.leave();
 }
 
-window.addEventListener('beforeunload', leaveChannel);
+// enable navigation prompt
+window.onbeforeunload = async (e) => {
+    e.preventDefault();
+    await channel.leave();
+    await client.leave();
+    await screenClient.leave();
+    return "Are you sure you want to reload the page?";
+};
+
 document.getElementById('message__form').addEventListener('submit', sendMessage);
+
 $("#btn_editor").css("display", "none");
 
 $(".html__editor__show").on("click",function () {

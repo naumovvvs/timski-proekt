@@ -33,6 +33,7 @@ chatButton.addEventListener('click', () => {
 
 let displayFrame = document.getElementById('stream__box');
 let videoFrames = document.getElementsByClassName('video__container');
+let cameraFrames = document.getElementsByClassName('camera_video_container');
 let userIdInDisplayFrame = null;
 
 let expandVideoFrame = (e) => {
@@ -44,14 +45,41 @@ let expandVideoFrame = (e) => {
   }
 
   displayFrame.style.display = 'block';
-  displayFrame.appendChild(e.currentTarget);
-  userIdInDisplayFrame = e.currentTarget.id;
 
-  // make other user's streams smaller
+  // if camera stream exists, make it bigger (300x180)
+  if(e.currentTarget.children[1] != undefined) {
+    e.currentTarget.children[1].style.setProperty("width", "300px", "important");
+    e.currentTarget.children[1].style.setProperty("height", "180px", "important");
+  }
+
+  // append the presenter to stream box (display frame)
+  displayFrame.appendChild(e.currentTarget);
+  // id of the user (ex. user-container-10000-screen)
+  userIdInDisplayFrame = e.currentTarget.id;
+  // add class for correct expansion
+  e.currentTarget.classList.add("cameraExpand");
+
+  // make other user's streams smaller (skip current user)
   for (let i=0; i<videoFrames.length; i++) {
     if(videoFrames[i].id !== userIdInDisplayFrame) {
-      videoFrames[i].style.height = '100px';
-      videoFrames[i].style.width = '100px';
+      videoFrames[i].style.height = '180px';
+      videoFrames[i].style.width = '300px';
+    }
+  }
+
+  // make other users cameras smaller (skip current user)
+  for (let i=0; i<cameraFrames.length; i++) {
+    let arr = cameraFrames[i].id.split("-");
+    let userId = arr[2]*10000;
+    let pom = (cameraFrames[i].id.substring(0,15))+userId+"-screen";
+
+    if(cameraFrames[i].id === userIdInDisplayFrame) {
+      continue;
+    }
+
+    if(pom !== userIdInDisplayFrame) {
+      cameraFrames[i].style.height = '90px';
+      cameraFrames[i].style.width = '170px';
     }
   }
 }
@@ -67,12 +95,28 @@ let hideDisplayFrame = () => {
 
   // remove user presenting (unpin user)
   let child = displayFrame.children[0];
+  // remove class to avoid wrong width and height
+  child.classList.remove("cameraExpand");
+  // remove from stream box and append to container below
   document.getElementById('streams__container').appendChild(child);
 
   // make user's streams bigger after clicking on presenter's screen (un-expand)
   for(let i=0; i<videoFrames.length; i++) {
     videoFrames[i].style.height = "300px";
-    videoFrames[i].style.width = "300px";
+    videoFrames[i].style.width = "500px";
+  }
+
+  for(let i=0; i<cameraFrames.length; i++) {
+    let arr = cameraFrames[i].id.split("-");
+    let userId = arr[2]*10000;
+    let pom = (cameraFrames[i].id.substring(0,15))+userId+"-screen";
+    let screenDiv = document.getElementById(pom);
+
+    // if user has shared screen, make cammera smaller when un-expanding
+    if(screenDiv!=null){
+      cameraFrames[i].style.height = "90px";
+      cameraFrames[i].style.width = "170px";
+    }
   }
 }
 

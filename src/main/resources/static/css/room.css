@@ -226,6 +226,15 @@
   background-size: 300px;
 }
 
+.cameraExpand {
+  border: 2px solid black;
+  border-radius: 0;
+  height: 100%!important;
+  width: 100%!important;
+
+  background-size: 300px;
+}
+
 #stream__box video {
   border-radius: 0;
 }
@@ -240,16 +249,15 @@
   margin-bottom: 225px;
 }
 
-.video__container {
+.video__container, .camera_video_container {
   display: flex;
   justify-content: center;
   align-items: center;
   border: 2px solid #bdbdbd;
-  border-radius: 50%;
   cursor: pointer;
   overflow: hidden;
   height: 300px;
-  width: 300px;
+  width: 500px;
 
   background-image: url("../img/user.png");
   background-repeat: no-repeat;
