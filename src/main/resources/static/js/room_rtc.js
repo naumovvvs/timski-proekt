@@ -902,14 +902,26 @@ let changeStudentStatus = async (e) => {
             let span = e.target.parentElement.parentElement.previousElementSibling.previousElementSibling;
             let userID = e.target.parentElement.parentElement.parentElement.getAttribute('id').match((/(\d+)/))[0];
 
+            let screenContainer = document.getElementById("user-container-" + (userID * 10000) + "-screen");
+            if (screenContainer != null) {
+                screenContainer.style.borderColor = newBorderClass;
+                // change screen-container position based on the new status
+                let parentElem = screenContainer.parentElement;
+                parentElem.removeChild(screenContainer);
+                let newContainerId = newStatus.toLowerCase() + "__container";
+                document.getElementById(newContainerId).appendChild(screenContainer);
+            }
             let userContainer = document.getElementById("user-container-" + userID);
-            userContainer.style.borderColor = newBorderClass;
-
-            // change user-container position based on the new status
-            let parentElem = userContainer.parentElement;
-            parentElem.removeChild(userContainer);
-            let newContainerId = newStatus.toLowerCase() + "__container";
-            document.getElementById(newContainerId).appendChild(userContainer);
+            if (userContainer != null) {
+                userContainer.style.borderColor = newBorderClass;
+                if (screenContainer == null) {
+                    // change user-container position based on the new status
+                    let parentElem = userContainer.parentElement;
+                    parentElem.removeChild(userContainer);
+                    let newContainerId = newStatus.toLowerCase() + "__container";
+                    document.getElementById(newContainerId).appendChild(userContainer);
+                }
+            }
             span.removeAttribute("class");
             span.classList.add(newStatusClass);
         },

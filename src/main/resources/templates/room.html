@@ -11,24 +11,17 @@
     <link rel='stylesheet' type='text/css' media='screen' href='/css/room.css'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <style>
-        ul.dropdown-menu {
-            margin-top: -2px;
-            list-style: none;
-            margin-bottom: -10px;
-            visibility: hidden;
-        }
-        ul.dropdown-menu button {
+        ul.status-menu button {
             font-weight: 500;
             font-size: 10pt;
         }
 
-        ul.dropdown-menu button:hover {
+        ul.status-menu button:hover {
             cursor: pointer;
         }
 
-        .member__wrapper:hover > ul.dropdown-menu {
-            list-style: none;
-            visibility: visible;
+        .member__wrapper:hover .status-menu {
+            visibility: visible!important;
         }
     </style>
 </head>

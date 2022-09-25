@@ -65,7 +65,7 @@ let addMemberToDom = async (MemberId) => {
             },
             success: function (response) {
                 if (response.roles[0].name === "ROLE_PROFESSOR") {
-                    let statusList = `<ul class="dropdown-menu">
+                    let statusList = `<ul class="status-menu" style="list-style: none; visibility: hidden;">
                             <li onclick="changeStudentStatus(event)" class="student_status"><button id="IDENTIFIED" style="background-color: #2aca3e">Identify</button></li>
                             <li onclick="changeStudentStatus(event)" class="student_status"><button id="SUSPICIOUS" style="background-color: #FFA500">Watch</button></li>
                             <li onclick="changeStudentStatus(event)" class="student_status"><button id="BLOCKED" style="background-color: #ff0000">Block</button></li>
