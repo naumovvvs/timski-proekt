@@ -32,7 +32,7 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
          console.log(response);
          window.localStorage.setItem('refreshToken', JSON.stringify(data['refreshToken']));
          window.localStorage.setItem('accessToken', JSON.stringify(data['accessToken']));
-         window.location.assign(window.location.slice(0, -6) + "/home");
+         window.location.assign(window.location.href.slice(0, -6) + "/home");
       },
       error: function (rs) {
          console.error(rs.status);
