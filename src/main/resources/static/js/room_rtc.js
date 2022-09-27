@@ -81,7 +81,7 @@ let roomId = urlParams.get('room');
 
 // if no room is present redirect to home
 if(!roomId) {
-    window.location.assign("http://localhost:8080/home");
+    window.location.assign(window.location.href + "/home");
 }
 
 // object used for sending info related to creating the RTC token

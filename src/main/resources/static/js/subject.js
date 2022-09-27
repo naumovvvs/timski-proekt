@@ -77,7 +77,7 @@ $.ajax({
                     let card = `<div class="d-flex align-items-center my-3">
                                     <img src="https://ispiti.finki.ukim.mk/theme/image.php/classic/bigbluebuttonbn/1637703842/icon">
                                        <p class="text-primary mx-2 my-0">
-                                        <a href="http://localhost:8080/room?room=${element.id}&student=${loggedInUserId}&isProfessor=${isModerator}" style="text-decoration: none;">${element.name}
+                                        <a href="/room?room=${element.id}&student=${loggedInUserId}&isProfessor=${isModerator}" style="text-decoration: none;">${element.name}
                                         </a>
                                        </p>`
                     if (isModerator) {
